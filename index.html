@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17191C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Compteur">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAE/klEQVR4Xu3dUY7TQBCE4SziDquV9ok7cUruxBMHQchSZOzY67Gne6ra//cICqR7KzVOvLBv7x+fD+CVb6wFWwgHCAfa0RygOdCO5gDNgXY0B2gOtKM5QHOgHc0BmgPtaA7QHGhHc4DmQDuaAzQH2tEcoDnQjuYAzYF2NAdoDrSjObDp+2138/vXn/nsP37+989C93/3Ju4SjsUXu9X64YswlVQ5HBcDsW/+h1cNSsFwhGbipeffWCwldcKRn4m1YimpEA6FWCxMT8m9SIzDIZiJlxHxTYllOPRjUaNI/D4Es0vGk90zd2oOu+VuXbG6XIt4hKNALOZcLlcNjpViyTA6ZdTDUTUZE/HpdI8V8cX1onzEiDbHTZIhfsQohuNuyZA9YhTDARGEA5sUw+HyGVFfglMrhgMiJMJxz2/Cm1vXhsJV+fhwTFtQ2IUOkZ0MDsdOJgTP4CA7k459zYwMx2LysYvQobOWYeF4GYXFL96hPPb/vczYz8eGhQP6xoTj+AlSuzyOT3d8Yx0NCMf+nEO2IEJtM9nhOPG1P/7y8nJirhPbuyI7HEckr0CE4NSp4RCc307mDlPDcVz597RH3sEOlxeOzMjXlrbJpHCkzXMTOftMCscJhU8WizPl8UgJR07M7yZhq7rNgeGcwnHiUyNBRlOEh+NK+115rIsrM1557BHh4YCv2HBERxuhG44NR3dGB/ZLXs9fPRyhr4zhxKcLDIf45GXE7TkwHHBHOLApKhwdu67MTZa4Wyodtz0XFQ4UQDiQfqyggJDmCDoCsSNi5yHhQA2EA7WuObzuUEwcn7NHc0QcqGNZTOQRDgzRPxwWr4mSum++fzhQBuFArXcryEFzYNPb+8cn68FLNAe45kA7mgM0B9r1/wGA3T+nm8R9A2aNP//lFBdxrIBjBe1oDtAcaNe/ORy/5amG7pvvHw6U4RGO7q+J4Swm8gjHQtBHKaEcn7NlOJCDcCD3razFgVpMxM5pDuQ2B2qgOZDeHB2PwOib9Wni/v+qjtueozmQ3hwoILA5groOC3F7DgxHF3GTKxCfTj0cC453KOa8nn9sOMRfGQWEbjg2HLAWHo4r0b7yWBdXZrzy2CPCw9GR14G9xWgKp3AgWUY4otvvnhK2mhGOc8rcUlmLu8nSV1I4EmJ+Kzn7TAqH6X/hqyknGY9HYjiaFD5TJhYnS15zUB5dpNWGaHNkzq9DcOrU5jhXHkafGjU5MVdygLLD8WU+kueXsj97/mYGhOPLfMydeHkZOT5dfjJErzkgYkxzbJVH+Xewa0fe0w6pjcHNsZh51ArU6KxlWHNMdgJx/Dx2tzPpzn4SDA7HMx9jt6Bm2sbwnYwPx8st3Kc2Jut5hydj8DUHxEk0x8LdamOrPIZTDAdEEA5sUgyHwrVYPsGpFcOh8C4umWAyHo+An7fSy7Sv8henmrGYiDbHk/LurhOfTj0chY8Y8WRIHytzxY4Y/VhM+v+MtzgFIuISC49rjjWv/a77z4hTcyyuUo3eyJgG2jIck+fGZVNimokn43AoF4l7LPwuSPcpFEmNTJRqjoX8lBTLROVwLI6bSffrkqqBmKtwzXHE+mvZFJc7RGHt7f3j3/0tYM3g3gpGIRzYRDhAONCO5gDNgXY0B2gOtKM5QHOgHc0BmgPtaA7QHGhHc4DmQDuaAzQH2tEcoDnQjuYAzYF2NAdoDrSjObDpL1mhgoU7IbBDAAAAAElFTkSuQmCC">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAE/klEQVR4Xu3dUY7TQBCE4SziDquV9ok7cUruxBMHQchSZOzY67Gne6ra//cICqR7KzVOvLBv7x+fD+CVb6wFWwgHCAfa0RygOdCO5gDNgXY0B2gOtKM5QHOgHc0BmgPtaA7QHGhHc4DmQDuaAzQH2tEcoDnQjuYAzYF2NAdoDrSjObDp+2138/vXn/nsP37+989C93/3Ju4SjsUXu9X64YswlVQ5HBcDsW/+h1cNSsFwhGbipeffWCwldcKRn4m1YimpEA6FWCxMT8m9SIzDIZiJlxHxTYllOPRjUaNI/D4Es0vGk90zd2oOu+VuXbG6XIt4hKNALOZcLlcNjpViyTA6ZdTDUTUZE/HpdI8V8cX1onzEiDbHTZIhfsQohuNuyZA9YhTDARGEA5sUw+HyGVFfglMrhgMiJMJxz2/Cm1vXhsJV+fhwTFtQ2IUOkZ0MDsdOJgTP4CA7k459zYwMx2LysYvQobOWYeF4GYXFL96hPPb/vczYz8eGhQP6xoTj+AlSuzyOT3d8Yx0NCMf+nEO2IEJtM9nhOPG1P/7y8nJirhPbuyI7HEckr0CE4NSp4RCc307mDlPDcVz597RH3sEOlxeOzMjXlrbJpHCkzXMTOftMCscJhU8WizPl8UgJR07M7yZhq7rNgeGcwnHiUyNBRlOEh+NK+115rIsrM1557BHh4YCv2HBERxuhG44NR3dGB/ZLXs9fPRyhr4zhxKcLDIf45GXE7TkwHHBHOLApKhwdu67MTZa4Wyodtz0XFQ4UQDiQfqyggJDmCDoCsSNi5yHhQA2EA7WuObzuUEwcn7NHc0QcqGNZTOQRDgzRPxwWr4mSum++fzhQBuFArXcryEFzYNPb+8cn68FLNAe45kA7mgM0B9r1/wGA3T+nm8R9A2aNP//lFBdxrIBjBe1oDtAcaNe/ORy/5amG7pvvHw6U4RGO7q+J4Swm8gjHQtBHKaEcn7NlOJCDcCD3razFgVpMxM5pDuQ2B2qgOZDeHB2PwOib9Wni/v+qjtueozmQ3hwoILA5groOC3F7DgxHF3GTKxCfTj0cC453KOa8nn9sOMRfGQWEbjg2HLAWHo4r0b7yWBdXZrzy2CPCw9GR14G9xWgKp3AgWUY4otvvnhK2mhGOc8rcUlmLu8nSV1I4EmJ+Kzn7TAqH6X/hqyknGY9HYjiaFD5TJhYnS15zUB5dpNWGaHNkzq9DcOrU5jhXHkafGjU5MVdygLLD8WU+kueXsj97/mYGhOPLfMydeHkZOT5dfjJErzkgYkxzbJVH+Xewa0fe0w6pjcHNsZh51ArU6KxlWHNMdgJx/Dx2tzPpzn4SDA7HMx9jt6Bm2sbwnYwPx8st3Kc2Jut5hydj8DUHxEk0x8LdamOrPIZTDAdEEA5sUgyHwrVYPsGpFcOh8C4umWAyHo+An7fSy7Sv8henmrGYiDbHk/LurhOfTj0chY8Y8WRIHytzxY4Y/VhM+v+MtzgFIuISC49rjjWv/a77z4hTcyyuUo3eyJgG2jIck+fGZVNimokn43AoF4l7LPwuSPcpFEmNTJRqjoX8lBTLROVwLI6bSffrkqqBmKtwzXHE+mvZFJc7RGHt7f3j3/0tYM3g3gpGIRzYRDhAONCO5gDNgXY0B2gOtKM5QHOgHc0BmgPtaA7QHGhHc4DmQDuaAzQH2tEcoDnQjuYAzYF2NAdoDrSjObDpL1mhgoU7IbBDAAAAAElFTkSuQmCC">
+<title>Compteur de match</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@500;600&display=swap">
+<style>
+/* Layout: two team panels side by side (stacked under 340px), score huge, buttons thumb-sized, tools in a bar at the bottom. */
+:root {
+  --bg: #EDEFF1;
+  --panel: #FFFFFF;
+  --fg: #17191C;
+  --muted: #5C646C;
+  --line: #CDD2D7;
+  --accent: #F5C400;
+  --on-accent: #17191C;
+  --red: #C9302C;
+  --blue: #2159C9;
+  --on-team: #FFFFFF;
+  --btn: #E3E6E9;
+  --font-display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --font-body: "Barlow", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111315; --panel: #1C1F22; --fg: #F1F2F3; --muted: #9AA2AA; --line: #343A40;
+    --red: #FF6A64; --blue: #6FA3FF; --on-team: #111315; --btn: #2A2E33; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111315; --panel: #1C1F22; --fg: #F1F2F3; --muted: #9AA2AA; --line: #343A40;
+  --red: #FF6A64; --blue: #6FA3FF; --on-team: #111315; --btn: #2A2E33; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-weight: 500;
+  padding-block: 12px 24px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-tap-highlight-color: transparent;
+}
+.wrap { max-width: 720px; margin: 0 auto; display: grid; gap: 12px; }
+.teams { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 339px) { .teams { grid-template-columns: 1fr; } }
+.team { --c: var(--red); background: var(--panel); border: 1px solid var(--line); border-top: 8px solid var(--c); border-radius: 6px; padding: 10px; display: grid; gap: 10px; min-width: 0; }
+.team[data-team="b"] { --c: var(--blue); }
+.name { width: 100%; font: 600 15px/1.2 var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--c); background: transparent; border: 0; border-bottom: 1px dashed var(--line); padding: 4px 0; min-width: 0; }
+.name:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.score { font: 700 clamp(88px, 28vw, 168px)/0.9 var(--font-display); text-align: center; color: var(--c); font-variant-numeric: tabular-nums; padding: 4px 0 0; }
+.row { display: grid; gap: 8px; }
+.plus { grid-template-columns: repeat(3, 1fr); }
+.minus { grid-template-columns: repeat(2, 1fr); }
+button { font: 700 22px/1 var(--font-display); min-height: 56px; border-radius: 6px; border: 2px solid transparent; background: var(--btn); color: var(--fg); cursor: pointer; touch-action: manipulation; }
+button:active { transform: scale(.96); }
+.plus button { background: var(--c); color: var(--on-team); font-size: 28px; min-height: 62px; }
+.minus button { background: transparent; border-color: var(--line); color: var(--fg); min-height: 48px; }
+.pompes { border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 8px; }
+.pompes .label { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.pompes .n { font: 700 34px/1 var(--font-display); color: var(--fg); font-variant-numeric: tabular-nums; }
+.pompes .btns { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+.pompes .add { background: var(--accent); color: var(--on-accent); }
+.pompes .less { background: transparent; border-color: var(--line); }
+.bar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.bar button { font-size: 18px; min-height: 48px; letter-spacing: .04em; text-transform: uppercase; }
+.bar .arm { border-color: var(--red); color: var(--red); }
+.hint { font-size: 13px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="teams" id="teams"></div>
+  <div class="bar">
+    <button id="undo" type="button">Annuler</button>
+    <button id="reset" type="button">Tout remettre à zéro</button>
+  </div>
+  <p class="hint" id="hint">Touche un nom pour le changer. Annuler revient en arrière sur la dernière action.</p>
+</div>
+
+<script>
+(function () {
+  var KEY = "compteur-match-v1";
+  var DEFAULTS = { a: { name: "Équipe rouge", score: 0, pompes: 0 }, b: { name: "Équipe bleue", score: 0, pompes: 0 } };
+  var state = load() || JSON.parse(JSON.stringify(DEFAULTS));
+  var hist = [];
+  var armTimer = null;
+
+  function load() { try { var v = localStorage.getItem(KEY); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function buzz() { try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {} }
+  function snap() { hist.push(JSON.stringify(state)); if (hist.length > 200) hist.shift(); }
+
+  function teamHTML(t) {
+    return '<section class="team" data-team="' + t + '">' +
+      '<input class="name" id="name-' + t + '" type="text" maxlength="20" aria-label="Nom de l\'équipe">' +
+      '<div class="score" id="score-' + t + '" aria-live="polite">0</div>' +
+      '<div class="row plus">' +
+        '<button type="button" data-t="' + t + '" data-d="1">+1</button>' +
+        '<button type="button" data-t="' + t + '" data-d="2">+2</button>' +
+        '<button type="button" data-t="' + t + '" data-d="3">+3</button>' +
+      '</div>' +
+      '<div class="row minus">' +
+        '<button type="button" data-t="' + t + '" data-d="-1">−1</button>' +
+        '<button type="button" data-t="' + t + '" data-d="-2">−2</button>' +
+      '</div>' +
+      '<div class="pompes">' +
+        '<div class="label"><span>Pompes</span><span class="n" id="pompes-' + t + '">0</span></div>' +
+        '<div class="btns">' +
+          '<button class="add" type="button" data-t="' + t + '" data-p="5">+5 pompes</button>' +
+          '<button class="less" type="button" data-t="' + t + '" data-p="-5">−5</button>' +
+        '</div>' +
+      '</div>' +
+    '</section>';
+  }
+
+  document.getElementById("teams").innerHTML = teamHTML("a") + teamHTML("b");
+
+  function render() {
+    ["a", "b"].forEach(function (t) {
+      document.getElementById("score-" + t).textContent = state[t].score;
+      document.getElementById("pompes-" + t).textContent = state[t].pompes;
+      var inp = document.getElementById("name-" + t);
+      if (document.activeElement !== inp) inp.value = state[t].name;
+    });
+    document.getElementById("undo").disabled = hist.length === 0;
+    document.getElementById("undo").style.opacity = hist.length ? 1 : .45;
+  }
+
+  document.getElementById("teams").addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    var t = b.getAttribute("data-t");
+    if (b.hasAttribute("data-d")) { snap(); state[t].score += parseInt(b.getAttribute("data-d"), 10); }
+    else if (b.hasAttribute("data-p")) { snap(); state[t].pompes = Math.max(0, state[t].pompes + parseInt(b.getAttribute("data-p"), 10)); }
+    else return;
+    save(); render(); buzz();
+  });
+
+  ["a", "b"].forEach(function (t) {
+    document.getElementById("name-" + t).addEventListener("input", function (e) {
+      state[t].name = e.target.value; save();
+    });
+  });
+
+  document.getElementById("undo").addEventListener("click", function () {
+    if (!hist.length) return;
+    state = JSON.parse(hist.pop()); save(); render(); buzz();
+  });
+
+  var resetBtn = document.getElementById("reset");
+  resetBtn.addEventListener("click", function () {
+    if (!resetBtn.classList.contains("arm")) {
+      resetBtn.classList.add("arm");
+      resetBtn.textContent = "Confirmer ?";
+      clearTimeout(armTimer);
+      armTimer = setTimeout(disarm, 3000);
+      return;
+    }
+    snap();
+    state.a.score = 0; state.a.pompes = 0; state.b.score = 0; state.b.pompes = 0;
+    save(); disarm(); render(); buzz();
+  });
+  function disarm() {
+    clearTimeout(armTimer);
+    resetBtn.classList.remove("arm");
+    resetBtn.textContent = "Tout remettre à zéro";
+  }
+
+  render();
+})();
+</script>
+
+</body>
+</html>
