@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@500;600&display=swap">
 <style>
-/* Layout: two team panels side by side (stacked under 340px), score huge, buttons thumb-sized, tools in a bar at the bottom. */
+/* Bloc 1 : socle + réglages. Deux écrans : le jeu (simple) et les réglages (configurations, boutons, règles). */
 :root {
   --bg: #EDEFF1;
   --panel: #FFFFFF;
@@ -25,6 +25,7 @@
   --red: #C9302C;
   --blue: #2159C9;
   --on-team: #FFFFFF;
+  --p0: #C9302C; --p1: #2159C9; --p2: #1E7B3A; --p3: #B85400; --p4: #7B3FBF; --p5: #C2185B; --p6: #3A4046; --p7: #0F7B83;
   --btn: #E3E6E9;
   --font-display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
   --font-body: "Barlow", Arial, sans-serif;
@@ -33,13 +34,16 @@
   :root:not([data-theme="light"]) {
     --bg: #111315; --panel: #1C1F22; --fg: #F1F2F3; --muted: #9AA2AA; --line: #343A40;
     --red: #FF6A64; --blue: #6FA3FF; --on-team: #111315; --btn: #2A2E33; color-scheme: dark;
+    --p0: #FF6A64; --p1: #6FA3FF; --p2: #5FD48A; --p3: #FFA24D; --p4: #B795F0; --p5: #FF7DAF; --p6: #C5CBD1; --p7: #4FD1DA;
   }
 }
 :root[data-theme="dark"] {
   --bg: #111315; --panel: #1C1F22; --fg: #F1F2F3; --muted: #9AA2AA; --line: #343A40;
   --red: #FF6A64; --blue: #6FA3FF; --on-team: #111315; --btn: #2A2E33; color-scheme: dark;
+  --p0: #FF6A64; --p1: #6FA3FF; --p2: #5FD48A; --p3: #FFA24D; --p4: #B795F0; --p5: #FF7DAF; --p6: #C5CBD1; --p7: #4FD1DA;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   background: var(--bg); color: var(--fg);
   font-family: var(--font-body); font-weight: 500;
@@ -48,134 +52,3091 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   -webkit-tap-highlight-color: transparent;
 }
-.wrap { max-width: 720px; margin: 0 auto; display: grid; gap: 12px; }
-.teams { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-@media (max-width: 339px) { .teams { grid-template-columns: 1fr; } }
-.team { --c: var(--red); background: var(--panel); border: 1px solid var(--line); border-top: 8px solid var(--c); border-radius: 6px; padding: 10px; display: grid; gap: 10px; min-width: 0; }
-.team[data-team="b"] { --c: var(--blue); }
-.name { width: 100%; font: 600 15px/1.2 var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--c); background: transparent; border: 0; border-bottom: 1px dashed var(--line); padding: 4px 0; min-width: 0; }
-.name:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.score { font: 700 clamp(88px, 28vw, 168px)/0.9 var(--font-display); text-align: center; color: var(--c); font-variant-numeric: tabular-nums; padding: 4px 0 0; }
-.row { display: grid; gap: 8px; }
-.plus { grid-template-columns: repeat(3, 1fr); }
-.minus { grid-template-columns: repeat(2, 1fr); }
+.wrap { max-width: 720px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 button { font: 700 22px/1 var(--font-display); min-height: 56px; border-radius: 6px; border: 2px solid transparent; background: var(--btn); color: var(--fg); cursor: pointer; touch-action: manipulation; }
 button:active { transform: scale(.96); }
-.plus button { background: var(--c); color: var(--on-team); font-size: 28px; min-height: 62px; }
-.minus button { background: transparent; border-color: var(--line); color: var(--fg); min-height: 48px; }
-.pompes { border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 8px; }
-.pompes .label { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-.pompes .n { font: 700 34px/1 var(--font-display); color: var(--fg); font-variant-numeric: tabular-nums; }
-.pompes .btns { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
-.pompes .add { background: var(--accent); color: var(--on-accent); }
-.pompes .less { background: transparent; border-color: var(--line); }
-.bar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+button:disabled { opacity: .45; cursor: default; transform: none; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.prim { background: var(--accent); color: var(--on-accent); }
+
+/* Barre du haut (écran de jeu) */
+.top { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+.top button { font-size: 18px; min-height: 48px; padding: 0 14px; text-transform: uppercase; letter-spacing: .04em; }
+select, .field { font: 600 16px/1.2 var(--font-body); min-height: 48px; border-radius: 6px; border: 2px solid var(--line); background: var(--panel); color: var(--fg); padding: 0 10px; min-width: 0; width: 100%; }
+
+/* Équipes */
+.teams { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+@media (max-width: 339px) { .teams { grid-template-columns: minmax(0, 1fr); } }
+.team { --c: var(--red); background: var(--panel); border: 1px solid var(--line); border-top: 8px solid var(--c); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; align-content: start; }
+.name { width: 100%; font: 600 15px/1.2 var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--c); background: transparent; border: 0; border-bottom: 1px dashed var(--line); padding: 4px 0; min-width: 0; }
+.score { font: 700 clamp(88px, 28vw, 168px)/0.9 var(--font-display); text-align: center; color: var(--c); font-variant-numeric: tabular-nums; padding: 4px 0 0; }
+
+/* Boutons de score (générés d'après la configuration) */
+.btns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.btns button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 62px; padding: 6px 4px; font-size: 28px; min-width: 0; }
+.btns.many button { min-height: 48px; font-size: 24px; }
+.btns button.pos { background: var(--c); color: var(--on-team); }
+.btns button.neg { background: transparent; border-color: var(--line); color: var(--fg); }
+.btns .gap { min-height: 62px; }
+.btns.many .gap { min-height: 48px; }
+.btns .l { font: 600 11px/1.1 var(--font-body); letter-spacing: 0; text-transform: none; max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; }
+
+/* Compteur annexe */
+.cnt { border-top: 1px solid var(--line); padding-top: 10px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.cnt .label { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.cnt .label span:first-child { min-width: 0; overflow-wrap: anywhere; line-height: 1.15; }
+.cnt .n { font: 700 34px/1 var(--font-display); color: var(--fg); font-variant-numeric: tabular-nums; }
+.cbtns { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 8px; }
+.cbtns .add { background: var(--accent); color: var(--on-accent); }
+.cbtns .less { background: transparent; border-color: var(--line); }
+
+.bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 10px; }
 .bar button { font-size: 18px; min-height: 48px; letter-spacing: .04em; text-transform: uppercase; }
-.bar .arm { border-color: var(--red); color: var(--red); }
-.hint { font-size: 13px; color: var(--muted); text-align: center; }
+.bar .arm, .arm { border-color: var(--red); color: var(--red); }
+.hint { font-size: 13px; color: var(--muted); text-align: center; margin: 0; }
+.hint + .hint { margin-top: -6px; }
+
+/* Temps (timer / chrono) */
+.time { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.clock { font: 700 clamp(64px, 22vw, 110px)/1 var(--font-display); font-variant-numeric: tabular-nums; text-align: center; padding-top: 2px; }
+.clock.warn { color: var(--red); }
+.trow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.trow button { min-height: 56px; font-size: 20px; text-transform: uppercase; letter-spacing: .04em; padding: 0 18px; }
+.trow #tReset { min-width: 64px; font-size: 26px; padding: 0 12px; }
+.trow #tReset.arm { font-size: 16px; }
+.tadj { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.exo .tadj { grid-template-columns: 1fr 1fr; gap: 8px; }
+.tuse { font-size: 17px; }
+.teams.solo { grid-template-columns: minmax(0, 1fr); }
+.teams.solo .team[data-team="b"] { display: none; }
+.ctl { display: flex; gap: 8px; flex-wrap: wrap; }
+.ctl button { flex: 1 1 0; min-width: 0; min-height: 44px; font-size: 16px; text-transform: uppercase; letter-spacing: .02em; padding: 0 8px; border-color: var(--line); }
+.ctlpanel .crow2 { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 8px; }
+.ctlpanel .crow2:first-child { border-top: 0; padding-top: 0; }
+.ctlpanel .cval { font: 700 28px/1 var(--font-display); text-transform: uppercase; }
+.ctlpanel .cbt { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.ctlpanel .cbt.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.ctlpanel .cbt button { min-height: 48px; font-size: 18px; padding: 0 2px; }
+.ctlpanel .cbt button.on { background: var(--accent); color: var(--on-accent); }
+.pal .pgains { grid-column: 1 / -1; display: grid; gap: 8px; }
+.pal .pgains button { min-height: 52px; font-size: 19px; text-align: center; padding: 6px 10px; line-height: 1.1; }
+.tadj button { min-height: 44px; font-size: 17px; text-transform: uppercase; letter-spacing: .03em; }
+.end { background: var(--accent); color: var(--on-accent); border-radius: 6px; padding: 10px; font: 700 22px/1.2 var(--font-display); text-align: center; text-transform: uppercase; letter-spacing: .02em; }
+.sub.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+
+/* Fin de manche */
+.over { background: var(--accent); color: var(--on-accent); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; text-align: center; }
+.over .otxt { font: 700 24px/1.15 var(--font-display); text-transform: uppercase; letter-spacing: .02em; }
+.over button { background: var(--on-accent); color: var(--accent); min-height: 52px; font-size: 20px; text-transform: uppercase; letter-spacing: .04em; }
+.over .ohint { font: 600 13px/1.2 var(--font-body); }
+.teams.locked .btns button, .teams.locked .cbtns button { opacity: .45; }
+.man { font: 600 13px/1 var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.man b { font: 700 24px/1 var(--font-display); color: var(--c); margin-left: 4px; }
+.card select.inline { min-height: 48px; }
+.bar2 { display: grid; grid-template-columns: minmax(0, 1fr); }
+.bar2 + .bar2 { margin-top: -2px; }
+.bar2 button { font-size: 18px; min-height: 48px; letter-spacing: .04em; text-transform: uppercase; }
+.notefield { font-size: 15px; }
+
+/* Équipes : couleurs */
+.tmblock { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; border-top: 1px solid var(--line); padding-top: 10px; }
+.tmblock:first-of-type { border-top: 0; padding-top: 0; }
+.sw { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+.sw button { min-height: 40px; padding: 0; border-radius: 6px; border: 3px solid transparent; font-size: 18px; color: var(--on-team); }
+.sw button.sel { border-color: var(--fg); }
+
+/* Journal */
+.jitem { border-top: 1px solid var(--line); padding-top: 10px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; align-items: start; }
+.jitem .jhead { font: 600 12px/1.2 var(--font-body); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.jitem .jscore { font: 700 22px/1.15 var(--font-display); overflow-wrap: anywhere; }
+.jitem .jmeta { font: 500 13px/1.3 var(--font-body); color: var(--muted); overflow-wrap: anywhere; }
+.jitem button { min-height: 40px; min-width: 40px; font-size: 16px; padding: 0 10px; grid-row: 1 / span 2; grid-column: 2; }
+.jitem button.arm { font-size: 13px; }
+.jbtns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.jbtns button, .jclear { font-size: 16px; min-height: 48px; text-transform: uppercase; letter-spacing: .03em; padding: 0 6px; }
+.sub button { font-size: 17px; min-height: 48px; text-transform: uppercase; letter-spacing: .03em; padding: 0 6px; }
+.jempty { color: var(--muted); font-size: 15px; margin: 0; }
+
+/* Bloc 5 : timer d'exercice, signal, palier, bouton Raté */
+.exo .exohead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font: 600 13px/1 var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.exo .exoclock { font: 700 44px/1 var(--font-display); font-variant-numeric: tabular-nums; color: var(--fg); letter-spacing: 0; }
+.exo.warn .exoclock { color: var(--red); }
+.exo .trow button { min-height: 44px; font-size: 18px; }
+.exo .trow #eReset { min-width: 64px; font-size: 24px; padding: 0 12px; }
+.exo .trow #eReset.arm { font-size: 15px; }
+.pal { background: var(--panel); border: 3px solid var(--accent); color: var(--fg); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.pal .ptxt { font: 700 20px/1.2 var(--font-display); text-transform: uppercase; letter-spacing: .02em; overflow-wrap: anywhere; }
+.pal button { min-height: 48px; padding: 0 18px; font-size: 18px; background: var(--accent); color: var(--on-accent); }
+.sigov { position: fixed; left: 0; right: 0; top: 0; z-index: 80; background: var(--accent); color: var(--on-accent); padding: 18px 16px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; text-align: center; border-bottom: 6px solid var(--fg); box-shadow: 0 8px 30px rgba(0,0,0,.45); animation: sigflash .6s ease-in-out 6; }
+.sigov .sigarrow { font: 700 72px/1 var(--font-display); }
+.sigov .sigtxt { font: 700 42px/1.05 var(--font-display); text-transform: uppercase; letter-spacing: .02em; overflow-wrap: anywhere; }
+.sigov button { background: var(--on-accent); color: var(--accent); min-height: 56px; font-size: 22px; text-transform: uppercase; }
+@keyframes sigflash { 0%, 100% { filter: none; } 50% { filter: invert(1) hue-rotate(180deg); } }
+.btns button.reset { border-style: dashed; }
+.rsym { display: grid; place-items: center; font: 700 26px/1 var(--font-display); padding: 0; }
+
+
+
+/* Réglages */
+.settings { display: grid; gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; }
+.card > * { min-width: 0; }
+.card h2 { font: 700 20px/1 var(--font-display); text-transform: uppercase; letter-spacing: .04em; margin: 0; }
+.card h2 small { font: 600 13px/1 var(--font-body); color: var(--muted); letter-spacing: 0; text-transform: none; }
+.row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.row3 button, .card > button, .backbtn { font-size: 17px; min-height: 48px; text-transform: uppercase; letter-spacing: .03em; }
+.row3 button { font-size: 15px; padding: 0 4px; letter-spacing: .02em; }
+.brow { display: grid; grid-template-columns: 48px 70px minmax(0, 1fr); gap: 8px; align-items: center; border-top: 1px solid var(--line); padding-top: 10px; }
+.brow .sign { min-height: 48px; font-size: 28px; padding: 0; }
+.brow .field { padding: 0 8px; }
+.brow .val { text-align: center; font-size: 18px; }
+.acts { grid-column: 1 / -1; display: flex; gap: 8px; justify-content: flex-end; }
+.acts button { min-height: 40px; font-size: 16px; padding: 0 16px; }
+.chk { display: flex; gap: 12px; align-items: center; font: 600 16px/1.25 var(--font-body); }
+.chk input { width: 26px; height: 26px; flex: none; accent-color: var(--accent); }
+.sub { display: grid; grid-template-columns: minmax(0, 1fr) 88px; gap: 8px; align-items: end; }
+.sub label { display: grid; gap: 4px; font: 600 13px/1.2 var(--font-body); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.note { font-size: 13px; color: var(--muted); margin: 0; }
+
+/* Bloc 6 : séances guidées */
+.top.guided { grid-template-columns: minmax(0, 1fr); }
+.gbar { background: var(--panel); border: 1px solid var(--line); border-left: 8px solid var(--accent); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.gbar .gtitle { font: 700 22px/1.1 var(--font-display); text-transform: uppercase; letter-spacing: .02em; overflow-wrap: anywhere; }
+.gbar .gsub { font: 600 14px/1.2 var(--font-body); color: var(--muted); }
+.gbtns { display: grid; grid-template-columns: minmax(0, .6fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr); gap: 8px; }
+.gbtns button { min-height: 48px; font-size: 17px; text-transform: uppercase; letter-spacing: .03em; padding: 0 4px; }
+.schov { position: fixed; inset: 0; z-index: 60; background: var(--bg); overflow-y: auto; padding: 12px 16px 24px; }
+.schov .schtabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.schov .schtabs button { min-height: 44px; padding: 0 14px; font-size: 16px; }
+.schov .schtabs button.on { background: var(--accent); color: #000; }
+.schov img { display: block; width: 100%; max-width: 520px; height: auto; margin: 8px auto; border-radius: 6px; background: #fff; }
+.schov .schtitle { font: 700 20px/1.1 var(--font-display); text-transform: uppercase; }
+#gSchema { min-height: 44px; font-size: 17px; text-transform: uppercase; letter-spacing: .03em; }
+.rappel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.rappel > * { min-width: 0; margin: 0; }
+.regle { background: color-mix(in srgb, var(--blue) 16%, var(--panel)); border: 1px solid var(--blue); border-radius: 6px; padding: 8px 12px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 3px; }
+.regle > * { min-width: 0; margin: 0; }
+.regle .rt { font: 700 12px/1.2 var(--font-display); text-transform: uppercase; letter-spacing: .08em; cursor: pointer; }
+.regle .rt::after { content: " ▾"; }
+.regle.closed .rt::after { content: " ▸ (touche pour ouvrir)"; }
+.regle.closed p:not(.rt) { display: none; }
+.regle p { font: 600 15px/1.3 var(--font-body); }
+.robj { font: 700 20px/1.2 var(--font-display); }
+.rrules { padding-left: 20px; font: 500 15px/1.35 var(--font-body); display: grid; gap: 4px; }
+.rdire { font: 500 15px/1.35 var(--font-body); background: var(--bg); border-radius: 6px; padding: 8px; overflow-wrap: anywhere; }
+.rdire b { display: block; font: 600 12px/1 var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+.rrob summary { font: 600 14px/1.3 var(--font-body); cursor: pointer; min-height: 40px; display: flex; align-items: center; }
+.rrob p { margin: 4px 0 0; font: 500 15px/1.35 var(--font-body); overflow-wrap: anywhere; }
+.acc { --c: var(--line); border: 1px solid var(--line); border-left: 8px solid var(--c); border-radius: 6px; background: var(--panel); }
+.acc > summary { min-height: 50px; display: flex; align-items: center; gap: 8px; font: 700 18px/1.1 var(--font-display); text-transform: uppercase; letter-spacing: .02em; cursor: pointer; padding: 0 10px; list-style: none; }
+.acc > summary::-webkit-details-marker { display: none; }
+.acc > summary::after { content: "▸"; margin-left: auto; font-size: 20px; }
+.acc[open] > summary::after { content: "▾"; }
+.acc .accb { padding: 2px 10px 12px; display: grid; gap: 8px; font: 500 16px/1.4 var(--font-body); overflow-wrap: anywhere; }
+.acc .accb p, .acc .accb ul { margin: 0; }
+.acc .accb ul { padding-left: 18px; display: grid; gap: 6px; }
+.acc .accb li b { font: 700 13px/1 var(--font-body); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 6px; }
+.s-obj { --c: var(--accent); }
+.s-org { --c: var(--blue); }
+.s-cpt { --c: #2e9d4f; }
+.s-rot { --c: #7B3FBF; }
+.s-tech { --c: #B85400; }
+.s-def { --c: var(--red); }
+.s-orient { --c: var(--red); border: 3px solid var(--red); border-left-width: 8px; }
+.s-orient > summary { color: var(--red); }
+.rvar { margin: 0; font: 600 15px/1.4 var(--font-body); background: var(--bg); border-radius: 6px; padding: 8px; overflow-wrap: anywhere; }
+.rvar b { display: block; font: 600 12px/1 var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+.schleg { font: 700 22px/1.2 var(--font-display); text-transform: uppercase; background: var(--accent); color: var(--on-accent); border-radius: 6px; padding: 10px; margin: 6px 0; }
+.gbtns2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; }
+.gtline { display: flex; align-items: flex-start; gap: 10px; }
+.gtline .gtitle { flex: 1 1 auto; min-width: 0; }
+.gtline .gn { flex: none; font: 700 22px/1.1 var(--font-display); background: var(--accent); color: var(--on-accent); border-radius: 6px; padding: 4px 8px; white-space: nowrap; }
+.presub { font: 700 26px/1.1 var(--font-display); text-transform: uppercase; margin: 0; }
+.prest { font: 600 17px/1.3 var(--font-body); margin: 0; }
+.bsay { background: var(--accent); color: var(--on-accent); border-radius: 6px; padding: 10px; display: grid; gap: 6px; }
+.bsay p { margin: 0; font: 700 19px/1.25 var(--font-display); }
+.bsay p.big { font-size: 26px; text-transform: uppercase; }
+.bnote { border-top: 1px solid var(--line); padding-top: 8px; font: 500 15px/1.35 var(--font-body); overflow-wrap: anywhere; }
+.bnote small { display: block; color: var(--muted); font: 600 12px/1.2 var(--font-body); }
+.nbox textarea { width: 100%; }
+.nbox .nrow { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 8px; }
+#gVar, #gSchema { min-height: 44px; font-size: 17px; text-transform: uppercase; letter-spacing: .03em; }
+.vov { position: fixed; inset: 0; z-index: 60; background: var(--bg); overflow-y: auto; padding: 12px 16px 24px; display: grid; align-content: start; gap: 12px; }
+.vov h2 { margin: 0; font: 700 20px/1.1 var(--font-display); text-transform: uppercase; }
+details.blk { border-top: 1px solid var(--line); }
+details.blk:first-of-type { border-top: 0; }
+details.blk summary { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 48px; font: 700 18px/1.15 var(--font-display); text-transform: uppercase; letter-spacing: .02em; cursor: pointer; }
+details.blk summary .bm { color: var(--muted); white-space: nowrap; }
+.blkbody { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 4px 0 12px; }
+.olab { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; font: 600 13px/1.2 var(--font-body); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.olab .chk { text-transform: none; letter-spacing: 0; color: var(--fg); }
+.srow { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 8px; align-items: center; border-top: 1px solid var(--line); padding-top: 8px; }
+.srow.cur { border-left: 6px solid var(--accent); padding-left: 6px; }
+.srow.done { background: color-mix(in srgb, #2e9d4f 22%, var(--panel)); border-radius: 6px; padding: 8px 6px 8px 6px; }
+.srow.cur { background: color-mix(in srgb, var(--accent) 22%, var(--panel)); border-radius: 6px; padding-top: 8px; padding-bottom: 8px; }
+.srow.todo { opacity: .6; }
+.gclock { font: 700 13px/1.2 var(--font-body); color: var(--muted); text-align: right; }
+.preclock { font: 700 34px/1.1 var(--font-display); text-transform: uppercase; }
+#pre ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+#pre li { font: 500 17px/1.3 var(--font-body); }
+.srow .sn { font: 700 22px/1 var(--font-display); }
+.srow .st { font: 700 18px/1.15 var(--font-display); text-transform: uppercase; overflow-wrap: anywhere; }
+.srow .st small { display: block; font: 500 13px/1.2 var(--font-body); color: var(--muted); text-transform: none; letter-spacing: 0; }
+.srow button { min-height: 44px; min-width: 76px; font-size: 16px; padding: 0 10px; text-transform: uppercase; }
+.crow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; border-top: 1px solid var(--line); padding-top: 8px; font: 600 15px/1.25 var(--font-body); overflow-wrap: anywhere; }
+.crow button { min-height: 40px; font-size: 15px; padding: 0 10px; text-transform: uppercase; }
+.filebtn { display: grid; place-items: center; min-height: 48px; border-radius: 6px; background: var(--btn); font: 700 16px/1 var(--font-display); text-transform: uppercase; letter-spacing: .03em; cursor: pointer; text-align: center; padding: 0 6px; }
+.sr { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+textarea.field { padding: 8px 10px; min-height: 96px; resize: vertical; font-size: 14px; }
+
+.thead { font: 600 13px/1 var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+details.blk summary .bt { display: grid; gap: 2px; min-width: 0; }
+details.blk summary .bt small { font: 500 12px/1.25 var(--font-body); color: var(--muted); text-transform: none; letter-spacing: 0; overflow-wrap: anywhere; }
+details.blk summary .bt small:empty { display: none; }
+#pNote:not(:empty) { background: var(--accent); color: var(--on-accent); border-radius: 6px; padding: 8px; font-weight: 600; }
+
+/* Bloc 7 : équipes multiples */
+.lgbar { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.lgbar .lgl { font: 600 15px/1.35 var(--font-body); overflow-wrap: anywhere; }
+.lgbar .lgl b, .bil b { font: 600 12px/1 var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-right: 6px; }
+.lgbar button { min-height: 44px; font-size: 16px; text-transform: uppercase; letter-spacing: .03em; margin-top: 2px; }
+.dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.bil { margin: 0; font: 600 15px/1.4 var(--font-body); overflow-wrap: anywhere; }
+.bil b { display: block; margin: 0 0 2px; }
+.lgpanel .sub { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.lgpanel button { font-size: 17px; min-height: 48px; text-transform: uppercase; }
 </style>
 </head>
 <body>
 
-<div class="wrap">
-  <div class="teams" id="teams"></div>
-  <div class="bar">
-    <button id="undo" type="button">Annuler</button>
-    <button id="reset" type="button">Tout remettre à zéro</button>
+<div class="wrap" id="play">
+  <div class="top" id="topbar">
+    <select id="cfgPlay" aria-label="Configuration active"></select>
+    <button id="gear" type="button" aria-label="Ouvrir les réglages">⚙ Réglages</button>
   </div>
-  <p class="hint" id="hint">Touche un nom pour le changer. Annuler revient en arrière sur la dernière action.</p>
+  <div class="gbar" id="gbar" hidden>
+    <div class="gclock" id="gClock"></div>
+    <div class="gtline"><div class="gtitle" id="gTitle"></div><div class="gn" id="gN"></div></div>
+    <div class="gsub" id="gSub"></div>
+    <div class="gbtns">
+      <button id="gPrev" type="button" aria-label="Exercice précédent">◀</button>
+      <button id="gFiche" type="button">Fiche</button>
+      <button id="gSeance" type="button">Séance</button>
+      <button id="gNext" class="prim" type="button">Terminer ▶</button>
+    </div>
+    <div class="gbtns2">
+      <button id="gVar" type="button" hidden>Variantes</button>
+      <button id="gSchema" type="button" hidden>Schéma</button>
+      <button id="gRes" type="button" hidden>Résultats</button>
+    </div>
+  </div>
+  <div class="vov" id="vov" hidden>
+    <h2 id="vTitle">Variantes</h2>
+    <div id="vOpts"></div>
+    <button id="vApply" class="prim" type="button">Appliquer</button>
+    <button id="vClose" type="button">Fermer sans changer</button>
+    <p class="note">« Appliquer » change la règle tout de suite, sans remettre les scores à zéro.</p>
+  </div>
+  <div class="schov" id="schov" hidden>
+    <div class="schtitle" id="schTitle">Schéma</div>
+    <div class="schtabs" id="schTabs"></div>
+    <div class="schleg" id="schLeg" hidden></div>
+    <img id="schImg" alt="Schéma de l'exercice">
+    <button id="schClose" class="prim" type="button">Fermer</button>
+  </div>
+  <div class="time exo" id="exo" hidden>
+    <div class="exohead"><span>Exercice</span><span class="exoclock" id="exoClock">0:00</span></div>
+    <div class="trow">
+      <button id="eGo" class="prim" type="button">Démarrer</button>
+      <button id="eReset" type="button" aria-label="Remettre le timer d'exercice à zéro">↺</button>
+    </div>
+    <div class="tadj" id="eAdj" hidden>
+      <button type="button" data-s="-60">− 1 min</button>
+      <button type="button" data-s="60">+ 1 min</button>
+    </div>
+  </div>
+  <div class="regle" id="regle" hidden></div>
+  <div class="rappel" id="rappel" hidden></div>
+  <div class="time" id="time" hidden>
+    <div class="thead" id="tLabel">Manche</div>
+    <label class="chk tuse" id="tUseL" hidden><input type="checkbox" id="tUse"> Timer de manche</label>
+    <div class="clock" id="clock">0:00</div>
+    <div class="trow" id="tRow">
+      <button id="tGo" class="prim" type="button">Démarrer</button>
+      <button id="tReset" type="button" aria-label="Remettre le temps à zéro">↺</button>
+    </div>
+    <div class="tadj" id="tAdj" hidden>
+      <button type="button" data-s="-60">− 1 min</button>
+      <button type="button" data-s="-10">− 10 s</button>
+      <button type="button" data-s="10">+ 10 s</button>
+      <button type="button" data-s="60">+ 1 min</button>
+    </div>
+  </div>
+  <div class="sigov" id="sig" hidden role="alert">
+    <div class="sigarrow" aria-hidden="true">⇄</div>
+    <div class="sigtxt" id="sigTxt"></div>
+    <button id="sigOk" type="button">OK</button>
+  </div>
+  <div class="pal" id="pal" hidden role="status">
+    <div class="ptxt" id="ptxt"></div>
+    <button id="pOk" type="button">OK</button>
+    <div class="pgains" id="pgains" hidden></div>
+  </div>
+  <div class="ctl" id="ctl" hidden>
+    <button id="ctlObj" type="button"></button>
+    <button id="ctlTime" type="button"></button>
+    <button id="ctlSeuil" type="button"></button>
+  </div>
+  <section class="card ctlpanel" id="ctlPanel" hidden>
+    <h2>Régler la manche en direct</h2>
+    <div id="ctlBody"></div>
+    <button id="ctlClose" class="prim" type="button">Fermer</button>
+  </section>
+  <div class="over" id="over" hidden role="status">
+    <div class="otxt" id="otxt"></div>
+    <button id="oNext" type="button">Manche suivante</button>
+    <div class="ohint" id="olg" hidden></div>
+    <div class="ohint" id="ohint"></div>
+  </div>
+  <div class="teams" id="teams"></div>
+  <div class="lgbar" id="lgBar" hidden>
+    <div class="lgl" id="lgWait"></div>
+    <div class="lgl" id="lgTally"></div>
+    <div class="lgl" id="lgTot" hidden></div>
+    <button id="lgEdit" type="button">Équipes</button>
+  </div>
+  <section class="card lgpanel" id="lgPanel" hidden>
+    <h2>Équipes en jeu</h2>
+    <div class="sub">
+      <label>Côté gauche<select id="lgA"></select></label>
+      <label>Côté droit<select id="lgB"></select></label>
+    </div>
+    <div class="sub">
+      <label>Nombre d'équipes<select id="lgN"></select></label>
+      <label>Rotation<select id="lgMode"></select></label>
+    </div>
+    <p class="note">Changer les équipes en jeu garde les scores affichés (pratique pour corriger). Les manches déjà gagnées sont conservées. Les noms et les couleurs se règlent dans l'écran Réglages.</p>
+    <button id="lgClose" type="button">Fermer</button>
+  </section>
+  <div class="bar" id="barBtns">
+    <button id="undo" type="button">Annuler</button>
+    <button id="endRound" type="button" hidden>Terminer la manche</button>
+  </div>
+  <div class="bar2" id="resetBar"><button id="reset" type="button">Tout remettre à zéro</button></div>
+  <input id="note" class="field notefield" type="text" maxlength="60" placeholder="Note de séance (facultatif) : U15, vendredi, 4c4…" aria-label="Note de séance">
+  <details class="acc nbox" id="nbox" hidden>
+    <summary>Note de séance</summary>
+    <div class="accb">
+      <textarea id="nText" class="field" maxlength="600" placeholder="Ce qui s'est passé, à retenir pour la suite (facultatif)" aria-label="Note de séance"></textarea>
+      <div class="nrow"><button id="nOk" class="prim" type="button">Valider la note</button></div>
+      <p class="note" id="nMsg"></p>
+    </div>
+  </details>
+  <div class="bar2"><button id="goSeance" type="button">Séance guidée</button></div>
+  <div class="bar2"><button id="goJournal" type="button">Journal des scores</button></div>
+  <p class="hint">Annuler revient en arrière sur la dernière action. Pour renommer une équipe, touche son nom au-dessus du score.</p>
+  <p class="hint" id="wl"></p>
+</div>
+
+<div class="wrap settings" id="settings" hidden>
+  <button id="back" class="prim backbtn" type="button">← Retour au jeu</button>
+
+  <section class="card" id="gNote" hidden>
+    <h2>Séance guidée</h2>
+    <p class="note">Les réglages ci-dessous ne valent que pour cet exercice de la séance. Ils ne modifient ni le fichier du cycle, ni tes configurations.</p>
+  </section>
+
+  <section class="card" id="cfgCard">
+    <h2>Configuration</h2>
+    <select id="cfgSel" aria-label="Choisir une configuration"></select>
+    <input id="cfgName" class="field" type="text" maxlength="30" placeholder="Nom de la configuration" aria-label="Nom de la configuration">
+    <div class="row3">
+      <button id="cfgNew" type="button">Nouvelle</button>
+      <button id="cfgDup" type="button">Dupliquer</button>
+      <button id="cfgDel" type="button">Supprimer</button>
+    </div>
+    <p class="note">Les configurations sont enregistrées sur ce téléphone. Les mêmes boutons servent aux deux équipes.</p>
+  </section>
+
+  <section class="card">
+    <h2>Équipes</h2>
+    <div class="tmblock">
+      <input id="tmName-a" class="field" type="text" maxlength="20" placeholder="Nom de l'équipe 1" aria-label="Nom de l'équipe 1">
+      <div class="sw" id="sw-a" role="group" aria-label="Couleur de l'équipe 1"></div>
+    </div>
+    <div class="tmblock">
+      <input id="tmName-b" class="field" type="text" maxlength="20" placeholder="Nom de l'équipe 2" aria-label="Nom de l'équipe 2">
+      <div class="sw" id="sw-b" role="group" aria-label="Couleur de l'équipe 2"></div>
+    </div>
+    <div class="sub two">
+      <label>Nombre d'équipes<select id="eqN"></select></label>
+      <label>Rotation<select id="eqMode"></select></label>
+    </div>
+    <div id="tmMore"></div>
+    <p class="note">Le nom et la couleur sont enregistrés avec la configuration. Tu peux aussi changer le nom en le touchant sur l'écran de jeu. À partir de 3 équipes, deux équipes jouent et les autres attendent ; « Manche suivante » fait tourner selon la rotation choisie.</p>
+  </section>
+
+  <section class="card">
+    <h2>Boutons <small id="bcount"></small></h2>
+    <div id="brows"></div>
+    <div class="row3">
+      <button id="addBtn" class="prim" type="button">+ Bouton</button>
+      <button id="addGap" type="button">+ Case vide</button>
+      <button id="addReset" type="button">+ Raté</button>
+    </div>
+    <p class="note">Une case vide ne compte rien : elle sert à aligner les boutons (par exemple +1, +2, +3, case vide, −1, −2). Le bouton « Raté » remet le score de l'équipe à zéro : avec un objectif de 10, tu obtiens « 10 paniers d'affilée ».</p>
+  </section>
+
+  <section class="card">
+    <h2>Exercice <small>(timer de tout l'exercice)</small></h2>
+    <div class="sub two">
+      <label>Minutes<input id="eMin" class="field" type="number" inputmode="numeric" min="0" max="99"></label>
+      <label>Secondes<input id="eSec" class="field" type="number" inputmode="numeric" min="0" max="59"></label>
+    </div>
+    <div class="sub two">
+      <label>Signal toutes les (min)<input id="sEvery" class="field" type="number" inputmode="numeric" min="0" max="99" placeholder="Aucun"></label>
+      <label>Libellé du signal<input id="sLabel" class="field" type="text" maxlength="30" placeholder="Rotation"></label>
+    </div>
+    <p class="note">Le timer d'exercice ne repart pas à chaque manche : il court sur tout l'exercice et s'arrête à 0 (laisse 0 et 0 pour ne pas en avoir). Le signal (bip double, vibration et bandeau) s'appuie sur ce timer : rotation des groupes, changement de match. Une alerte prévient aussi quand il reste 1 minute.</p>
+  </section>
+
+  <section class="card">
+    <h2>Temps de manche</h2>
+    <select id="tMode" aria-label="Type de temps">
+      <option value="none">Aucun</option>
+      <option value="timer">Timer (décompte)</option>
+      <option value="chrono">Chrono (compte vers le haut)</option>
+    </select>
+    <div class="sub two" id="tTimerOpts" hidden>
+      <label>Minutes<input id="tMin" class="field" type="number" inputmode="numeric" min="0" max="99"></label>
+      <label>Secondes<input id="tSec" class="field" type="number" inputmode="numeric" min="0" max="59"></label>
+    </div>
+    <div id="tNomRow" hidden>
+      <input id="tNom" class="field" type="text" maxlength="24" placeholder="Nom du timer (ex. Manche, Rotation)" aria-label="Nom du timer de manche">
+    </div>
+    <div id="chRow" hidden>
+      <label class="chk"><input id="chChk" type="checkbox"> Enchaîner les manches automatiquement</label>
+      <div class="sub two" id="chPauseRow" hidden>
+        <label>Mise en place (secondes)<input id="chPause" class="field" type="number" inputmode="numeric" min="5" max="300"></label>
+      </div>
+      <p class="note">Quand la manche se termine, le résultat est enregistré, la mise en place décompte, puis la manche suivante démarre toute seule (bip). Le timer d'exercice ne s'arrête jamais.</p>
+    </div>
+    <div id="tEndRow" hidden>
+      <select id="tEnd" class="inline" aria-label="Fin du temps">
+        <option value="score">À la fin du temps : le plus haut score gagne</option>
+        <option value="none">À la fin du temps : personne ne gagne (les deux équipes perdent)</option>
+      </select>
+      <input id="tSanction" class="field" type="text" maxlength="60" placeholder="Sanction ou malus (texte libre)" aria-label="Sanction ou malus" hidden>
+    </div>
+    <p class="note">Le timer décompte et annonce le gagnant à la fin. Le chrono compte vers le haut, sans lien avec le score. Sur l'écran de jeu, tu peux ajuster le timer de 1 minute avant de le lancer.</p>
+  </section>
+
+  <section class="card">
+    <h2>Fin de jeu</h2>
+    <div class="sub two">
+      <label>Objectif de score<input id="gScore" class="field" type="number" inputmode="numeric" min="0" max="99" placeholder="Aucun"></label>
+      <label id="gCntLbl">Objectif <span id="gCntName">Compteur 2</span><input id="gCnt" class="field" type="number" inputmode="numeric" min="0" max="99" placeholder="Aucun"></label>
+    </div>
+    <p class="note">Laisse vide pour ne pas utiliser d'objectif. La première équipe qui atteint un objectif gagne la manche. Avec un timer, le premier des deux événements (objectif ou temps écoulé) termine la manche.</p>
+    <select id="rMode" class="inline" aria-label="Manches">
+      <option value="none">Manches : aucune</option>
+      <option value="fixed">Manches à gagner (nombre fixe)</option>
+      <option value="free">Manches : décompte libre</option>
+    </select>
+    <div class="sub two" id="rTargetRow" hidden>
+      <label>Manches à gagner<input id="rTarget" class="field" type="number" inputmode="numeric" min="1" max="9"></label>
+    </div>
+    <label class="chk"><input id="tSound" type="checkbox"> Bip de fin de manche (la vibration reste active)</label>
+    <p class="note">À la fin d'une manche, les boutons se verrouillent : touche un bouton deux fois pour déverrouiller et corriger un score. « Manche suivante » valide la manche et remet les scores à zéro. En cas d'égalité, aucune manche n'est comptée.</p>
+  </section>
+
+  <section class="card">
+    <h2>Règles</h2>
+    <label class="chk"><input id="negChk" type="checkbox"> Autoriser les scores négatifs</label>
+  </section>
+
+  <section class="card">
+    <h2>Compteur 2</h2>
+    <label class="chk"><input id="cntChk" type="checkbox"> Afficher un compteur sous chaque équipe</label>
+    <div class="sub">
+      <label>Nom<input id="cntName" class="field" type="text" maxlength="20" placeholder="Compteur 2"></label>
+      <label>Pas<input id="cntStep" class="field" type="number" inputmode="numeric" min="1" max="99"></label>
+    </div>
+    <div class="sub two" id="pRow">
+      <label>Palier tous les<input id="pEvery" class="field" type="number" inputmode="numeric" min="0" max="99" placeholder="Aucun"></label>
+      <label>Message du palier<input id="pMsg" class="field" type="text" maxlength="60" placeholder="Palier atteint"></label>
+    </div>
+    <p class="note">Palier : quand une équipe atteint un multiple (3, 6, 9… avec « 3 »), un bandeau l'annonce, par exemple « possession supplémentaire en zone avant ». L'appli ne fait qu'annoncer, c'est toi qui accordes le bonus.</p>
+    <p class="note">Compteur hors score : une récompense, une sanction, ou une situation à compter (par exemple les paniers en transition). Exemples : « Transition » avec un pas de 1, « Pompes » avec un pas de 5.</p>
+  </section>
+</div>
+
+<div class="wrap settings" id="journal" hidden>
+  <button id="jBack" class="prim backbtn" type="button">← Retour au jeu</button>
+  <section class="card">
+    <h2>Journal des scores <small id="jCount"></small></h2>
+    <select id="jDay" aria-label="Choisir un jour"></select>
+    <div class="jbtns">
+      <button id="jShare" type="button">Partager le résumé</button>
+      <button id="jCopy" type="button">Copier le résumé</button>
+      <button id="jCsv" type="button">Exporter tout (CSV)</button>
+      <button id="jClear" class="jclear" type="button">Tout vider</button>
+    </div>
+    <p class="hint" id="jMsg"></p>
+    <p class="note">Une ligne est enregistrée à chaque fin de manche validée, à chaque remise à zéro d'une partie en cours et à chaque changement de configuration. Le résumé suit le jour choisi ; le CSV contient tout (séparateur point-virgule, s'ouvre dans Excel ou Google Sheets).</p>
+  </section>
+  <section class="card" id="jList"></section>
+</div>
+
+<div class="wrap settings" id="prep" hidden>
+  <button id="pBack" class="prim backbtn" type="button">← Retour au jeu</button>
+  <section class="card">
+    <h2>Séance guidée</h2>
+    <select id="pCycle" aria-label="Choisir un cycle"></select>
+    <select id="pSeance" aria-label="Choisir une séance"></select>
+    <p class="note" id="pInfo"></p>
+    <div class="jbtns">
+      <button id="pBase" type="button">Réglages de base</button>
+      <button id="pGo" class="prim" type="button">Lancer la séance</button>
+    </div>
+    <p class="hint" id="pNote"></p>
+  </section>
+  <section class="card" id="pBlocksCard">
+    <h2>Exercices <small>(touche un exercice pour régler sa durée et ses variantes)</small></h2>
+    <div id="pBlocks"></div>
+    <p class="note">« Réglages de base » recharge, pour chaque exercice, la durée et les variantes proposées par défaut. Ces réglages ne valent que pour cette séance : le fichier du cycle n'est jamais modifié.</p>
+  </section>
+  <section class="card">
+    <h2>Importer un cycle</h2>
+    <textarea id="cImport" class="field" rows="4" maxlength="500000" placeholder="Colle ici le texte du fichier de cycle…" aria-label="Texte du fichier de cycle"></textarea>
+    <div class="jbtns">
+      <button id="cDo" type="button">Importer le texte</button>
+      <label class="filebtn" for="cFile">Choisir un fichier<input id="cFile" class="sr" type="file" accept=".json,.txt,application/json,text/plain"></label>
+    </div>
+    <p class="hint" id="cMsg"></p>
+    <div id="cList"></div>
+    <p class="note">Un cycle importé est enregistré sur ce téléphone. Importer un cycle qui porte le même identifiant le met à jour.</p>
+  </section>
+</div>
+
+<div class="wrap settings" id="pre" hidden>
+  <button id="preBack" class="prim backbtn" type="button">← Retour à la préparation</button>
+  <section class="card">
+    <p class="presub" id="preSub"></p>
+    <p class="prest" id="preTitle">Avant la séance</p>
+    <div class="preclock" id="preClock"></div>
+  </section>
+  <section class="card" id="preAl" hidden><h2>Alertes pour moi</h2><ul id="preAlL"></ul></section>
+  <section class="card" id="preMat" hidden><h2>Matériel</h2><div id="preMatL"></div></section>
+  <section class="card"><h2>Déroulé</h2><div id="preList"></div></section>
+  <section class="card" id="preAcc" hidden><h2>Accueil à répéter</h2><div id="preAccB"></div></section>
+  <section class="card" id="preRap" hidden><h2>Rappels aux joueurs</h2><ul id="preRapL"></ul></section>
+  <section class="card" id="preMatch" hidden><h2>Prochain match</h2><p id="preMatchT"></p></section>
+  <button id="preGo" class="prim" type="button">Démarrer la séance</button>
+</div>
+
+<div class="wrap settings" id="seance" hidden>
+  <button id="sBack" class="prim backbtn" type="button">← Retour au jeu</button>
+  <section class="card">
+    <h2 id="sTitle">Séance</h2>
+    <p class="note" id="sSub"></p>
+    <div id="sBlocks"></div>
+  </section>
+  <section class="card" id="sOptCard">
+    <h2>Variantes de cet exercice</h2>
+    <div id="sOpts"></div>
+    <button id="sApply" type="button">Appliquer</button>
+    <p class="note">« Appliquer » met les nouveaux réglages en place tout de suite, sans remettre les scores à zéro. Les réglages modifiés à la main dans l'écran Réglages sont alors remplacés.</p>
+  </section>
+  <section class="card" id="sBilan" hidden>
+    <h2>Bilan de la séance</h2>
+    <div id="sBilanBody"></div>
+  </section>
+  <section class="card" id="sDone" hidden>
+    <h2>Séance terminée</h2>
+    <p class="note" id="sDoneTxt"></p>
+  </section>
+  <button id="sQuit" class="backbtn" type="button">Quitter la séance</button>
 </div>
 
 <script>
 (function () {
-  var KEY = "compteur-match-v1";
-  var DEFAULTS = { a: { name: "Équipe rouge", score: 0, pompes: 0 }, b: { name: "Équipe bleue", score: 0, pompes: 0 } };
-  var state = load() || JSON.parse(JSON.stringify(DEFAULTS));
+  var KEY = "compteur-match-v2";
+  var JKEY = "compteur-match-journal-v1";
+  var CKEY = "compteur-match-cycles-v1";
+  var MAXB = 10;
+  var NCOL = 8;
+  var MAXT = 6;
+  var COLN = ["rouge", "bleue", "verte", "orange", "violette", "rose", "grise", "turquoise"];
+  var MODES = ["paires", "tournoi", "tourniquet", "gagnant", "manuel"];
+  var MODEL = { paires: "Par paires (1-2, puis 3-4…)", tournoi: "Tournoi (tous contre tous)", tourniquet: "Tourniquet (la plus ancienne sort)", gagnant: "Le gagnant reste", manuel: "Je choisis à chaque fois" };
+  var MODKEYS = ["allowNegative", "buttons", "counter", "timer", "goals", "rounds", "exo", "signal", "palier", "teams", "noscore", "boutons_plus", "equipes", "enchainement", "solo", "gains_plus"];
+  var journal = loadJournal();
+  var cycles = loadCycles();
+  var prep = { cycleId: "", seance: 0, choix: {}, durs: {}, regl: {} };
+  var rappelOpen = true, rappelKey = "";
+  var histJ = [];
+  var state = load() || defaults();
   var hist = [];
-  var armTimer = null;
+  var armTimers = {};
+  var wl = null;
+  var wlOK = "wakeLock" in navigator;
 
-  function load() { try { var v = localStorage.getItem(KEY); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function uid() { return "c" + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36); }
+  function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+  function toInt(v, d) { var n = parseInt(v, 10); return isNaN(n) ? d : n; }
+
+  /* ---------- Données ---------- */
+  function standard() {
+    return { id: uid(), name: "Standard", allowNegative: true,
+      buttons: [{ label: "", value: 1 }, { label: "", value: 2 }, { label: "", value: 3 }, { label: "", value: 0, gap: true }, { label: "", value: -1 }, { label: "", value: -2 }],
+      counter: { enabled: true, name: "Compteur 2", step: 1 }, timer: defTimer(), goals: defGoals(), rounds: defRounds(), teams: defTeams(), exo: cleanExo(), signal: cleanSignal(), palier: cleanPalier(), equipes: cleanEquipes(), enchainement: cleanEnch() };
+  }
+  function blank(name) {
+    return { id: uid(), name: name, allowNegative: true,
+      buttons: [{ label: "", value: 1 }, { label: "", value: 2 }, { label: "", value: 3 }],
+      counter: { enabled: false, name: "Compteur 2", step: 1 }, timer: defTimer(), goals: defGoals(), rounds: defRounds(), teams: defTeams(), exo: cleanExo(), signal: cleanSignal(), palier: cleanPalier(), equipes: cleanEquipes(), enchainement: cleanEnch() };
+  }
+  function defaults() {
+    var c = standard();
+    return { configs: [c], activeId: c.id,
+      game: { a: { score: 0, counter: 0 }, b: { score: 0, counter: 0 }, manches: { a: 0, b: 0 }, over: null, rang: 0, pal: null, lost: 0, st: { a: {}, b: {} } },
+      note: "",
+      time: { elapsed: 0, startedAt: null, duration: c.timer.duration, done: false, w1: false },
+      exo: { elapsed: 0, startedAt: null, duration: 0, done: false, sig: 0, w1: false }, guided: null, lg: cleanLg(null) };
+  }
+  function load() {
+    try {
+      var v = JSON.parse(localStorage.getItem(KEY));
+      if (!v || !Array.isArray(v.configs)) return null;
+      return clean(v);
+    } catch (e) { return null; }
+  }
+  function clean(v) {
+    var d = defaults();
+    function cleanCfg(c) {
+      var bs = (Array.isArray(c.buttons) ? c.buttons : []).slice(0, MAXB).map(function (b) {
+        if (b && b.gap) return { label: "", value: 0, gap: true };
+        if (b && b.reset) return { label: String(b.label || "").slice(0, 24), value: 0, reset: true };
+        var n = toInt(b && b.value, 1); if (!n) n = 1;
+        return { label: String((b && b.label) || "").slice(0, 24), value: clamp(n, -99, 99) };
+      });
+      if (!bs.some(function (b) { return !b.gap && !b.reset; })) bs.push({ label: "", value: 1 });
+      if (!bs.length) bs.push({ label: "", value: 1 });
+      var k = c.counter || {};
+      return { id: String(c.id || uid()), name: String(c.name || "Sans nom").slice(0, 30), allowNegative: c.allowNegative !== false,
+        buttons: bs, counter: { enabled: !!k.enabled, name: String(k.name || "Compteur 2").slice(0, 20), step: clamp(toInt(k.step, 1), 1, 99) }, timer: cleanTimer(c.timer), goals: cleanGoals(c.goals), rounds: cleanRounds(c.rounds), teams: cleanTeams(c.teams), exo: cleanExo(c.exo), signal: cleanSignal(c.signal), palier: cleanPalier(c.palier), noscore: !!c.noscore, solo: !!c.solo, equipes: cleanEquipes(c.equipes), enchainement: cleanEnch(c.enchainement) };
+    }
+    var cfgs = v.configs.filter(function (c) { return c && typeof c === "object"; }).map(cleanCfg);
+    if (!cfgs.length) return null;
+    var g = v.game || {};
+    function team(t) {
+      var x = g[t] || {};
+      return { score: toInt(x.score, 0), counter: Math.max(0, toInt(x.counter, 0)) };
+    }
+    var activeId = cfgs.some(function (c) { return c.id === v.activeId; }) ? v.activeId : cfgs[0].id;
+    var act = cfgs.filter(function (c) { return c.id === activeId; })[0];
+    /* reprise des noms d'équipe de l'ancienne version (stockés dans la partie) pour la configuration active */
+    var rawAct = v.configs.filter(function (c) { return c && c.id === activeId; })[0];
+    if (rawAct && !rawAct.teams) {
+      ["a", "b"].forEach(function (t) { var nm = g[t] && g[t].name; if (nm) act.teams[t].name = String(nm).slice(0, 20); });
+    }
+    var gd = cleanGuided(v.guided);
+    if (gd) act = gd.cfg;
+    var tm = v.time || {};
+    var started = typeof tm.startedAt === "number" ? Math.min(tm.startedAt, Date.now()) : null;
+    return { configs: cfgs, activeId: activeId, note: String(v.note || "").slice(0, 60), game: { a: team("a"), b: team("b"),
+        manches: { a: Math.max(0, toInt(g.manches && g.manches.a, 0)), b: Math.max(0, toInt(g.manches && g.manches.b, 0)) }, over: cleanOver(g.over), rang: Math.max(0, toInt(g.rang, 0)), pal: cleanPal(g.pal), lost: Math.max(0, toInt(g.lost, 0)), st: cleanSt(g.st) },
+      time: { elapsed: Math.max(0, toInt(tm.elapsed, 0)), startedAt: started, duration: clamp(toInt(tm.duration, act.timer.duration), 5, 5999), done: !!tm.done, w1: !!tm.w1, off: !!tm.off, pz: cleanPz(tm.pz) },
+      exo: cleanExoState(v.exo, act), guided: gd, lg: cleanLg(v.lg, v.game) };
+  }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
   function buzz() { try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {} }
-  function snap() { hist.push(JSON.stringify(state)); if (hist.length > 200) hist.shift(); }
-
-  function teamHTML(t) {
-    return '<section class="team" data-team="' + t + '">' +
-      '<input class="name" id="name-' + t + '" type="text" maxlength="20" aria-label="Nom de l\'équipe">' +
-      '<div class="score" id="score-' + t + '" aria-live="polite">0</div>' +
-      '<div class="row plus">' +
-        '<button type="button" data-t="' + t + '" data-d="1">+1</button>' +
-        '<button type="button" data-t="' + t + '" data-d="2">+2</button>' +
-        '<button type="button" data-t="' + t + '" data-d="3">+3</button>' +
-      '</div>' +
-      '<div class="row minus">' +
-        '<button type="button" data-t="' + t + '" data-d="-1">−1</button>' +
-        '<button type="button" data-t="' + t + '" data-d="-2">−2</button>' +
-      '</div>' +
-      '<div class="pompes">' +
-        '<div class="label"><span>Pompes</span><span class="n" id="pompes-' + t + '">0</span></div>' +
-        '<div class="btns">' +
-          '<button class="add" type="button" data-t="' + t + '" data-p="5">+5 pompes</button>' +
-          '<button class="less" type="button" data-t="' + t + '" data-p="-5">−5</button>' +
-        '</div>' +
-      '</div>' +
-    '</section>';
+  function snap() { hist.push(JSON.stringify({ g: state.game, l: state.lg })); histJ.push(null); if (hist.length > 200) { hist.shift(); histJ.shift(); } }
+  function clearHist() { hist = []; histJ = []; }
+  function cfg() {
+    if (state.guided && state.guided.cfg) return state.guided.cfg;
+    for (var i = 0; i < state.configs.length; i++) if (state.configs[i].id === state.activeId) return state.configs[i];
+    return state.configs[0];
   }
 
-  document.getElementById("teams").innerHTML = teamHTML("a") + teamHTML("b");
+  /* ---------- Écran allumé ---------- */
+  function setWl() {
+    $("wl").textContent = wl ? "Écran maintenu allumé."
+      : (wlOK ? "Écran : touche l'écran une fois pour qu'il reste allumé." : "Ce navigateur ne peut pas garder l'écran allumé : règle la mise en veille de ton téléphone sur 10 minutes.");
+  }
+  function wlRequest() {
+    if (!wlOK || document.visibilityState !== "visible") { setWl(); return; }
+    try {
+      navigator.wakeLock.request("screen").then(function (s) {
+        wl = s;
+        s.addEventListener("release", function () { wl = null; setWl(); });
+        setWl();
+      }).catch(function () { wl = null; setWl(); });
+    } catch (e) { setWl(); }
+  }
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible" && !wl) wlRequest(); });
+  document.addEventListener("click", function () { if (!wl) wlRequest(); }, true);
 
-  function render() {
+  /* ---------- Temps (timer / chrono) ---------- */
+  var actx = null;
+  function defTimer() { return { mode: "none", duration: 600, sound: true, end: "score", sanction: "" }; }
+  function cleanExo(e) { var d = toInt(e && e.duration, 0); return { duration: d > 0 ? clamp(d, 30, 21600) : 0 }; }
+  function cleanSignal(x) {
+    x = x || {}; var ev = parseFloat(x.every); ev = isFinite(ev) ? Math.round(ev * 2) / 2 : 0;
+    var at = (Array.isArray(x.at) ? x.at : []).slice(0, 6).map(function (a) { var t = parseFloat(a && a.t); return { t: isFinite(t) ? Math.round(t * 2) / 2 : 0, label: String((a && a.label) || "").slice(0, 30) }; }).filter(function (a) { return a.t > 0; }).sort(function (a, b) { return a.t - b.t; });
+    return { every: clamp(ev, 0, 99), half: !!x.half, label: String(x.label || "").slice(0, 30), at: at };
+  }
+  function cleanGains(a) { return (Array.isArray(a) ? a : []).slice(0, 6).map(function (g) { return String(g === undefined || g === null ? "" : g).slice(0, 80); }).filter(Boolean); }
+  function cleanPalier(x) { x = x || {}; return { every: clamp(toInt(x.every, 0), 0, 99), msg: String(x.msg || "").slice(0, 60), gains: cleanGains(x.gains) }; }
+  function cleanSt(x) {
+    var out = { a: {}, b: {} };
     ["a", "b"].forEach(function (t) {
-      document.getElementById("score-" + t).textContent = state[t].score;
-      document.getElementById("pompes-" + t).textContent = state[t].pompes;
-      var inp = document.getElementById("name-" + t);
-      if (document.activeElement !== inp) inp.value = state[t].name;
+      var m = x && isObj(x[t]) ? x[t] : {}, n = 0;
+      Object.keys(m).forEach(function (k) {
+        if (n >= 40 || k === "__proto__" || k === "constructor" || k === "prototype") return;
+        var v = toInt(m[k], 0); if (v > 0) { out[t][String(k).slice(0, 60)] = Math.min(v, 9999); n++; }
+      });
     });
-    document.getElementById("undo").disabled = hist.length === 0;
-    document.getElementById("undo").style.opacity = hist.length ? 1 : .45;
+    return out;
   }
-
-  document.getElementById("teams").addEventListener("click", function (e) {
-    var b = e.target.closest("button");
-    if (!b) return;
-    var t = b.getAttribute("data-t");
-    if (b.hasAttribute("data-d")) { snap(); state[t].score += parseInt(b.getAttribute("data-d"), 10); }
-    else if (b.hasAttribute("data-p")) { snap(); state[t].pompes = Math.max(0, state[t].pompes + parseInt(b.getAttribute("data-p"), 10)); }
-    else return;
-    save(); render(); buzz();
-  });
-
-  ["a", "b"].forEach(function (t) {
-    document.getElementById("name-" + t).addEventListener("input", function (e) {
-      state[t].name = e.target.value; save();
+  function cleanPal(x) { return x && (x.t === "a" || x.t === "b") ? { t: x.t, v: toInt(x.v, 0) } : null; }
+  function cleanExoState(x, act) {
+    x = x || {}; var d = act.exo.duration;
+    var st = typeof x.startedAt === "number" ? Math.min(x.startedAt, Date.now()) : null;
+    return { elapsed: Math.max(0, toInt(x.elapsed, 0)), startedAt: d > 0 ? st : null, duration: d > 0 ? clamp(toInt(x.duration, d), 30, 21600) : 0,
+      done: d > 0 && !!x.done, sig: Math.max(0, toInt(x.sig, 0)), w1: !!x.w1 };
+  }
+  function cleanEnch(x) {
+    x = x || {};
+    return { actif: !!(x.actif || x.on), pause: clamp(toInt(x.pause, 30), 5, 300) };
+  }
+  function cleanPz(x) {
+    if (!x || typeof x !== "object" || toInt(x.dur, 0) <= 0) return null;
+    return { dur: clamp(toInt(x.dur, 30), 5, 300), el: Math.max(0, toInt(x.el, 0)), t0: typeof x.t0 === "number" ? Math.min(x.t0, Date.now()) : null };
+  }
+  function cleanEquipes(x) {
+    x = x || {};
+    return { n: clamp(toInt(x.n, 2), 2, MAXT), mode: MODES.indexOf(x.mode) >= 0 ? x.mode : "paires" };
+  }
+  function cleanLg(x, g) {
+    x = isObj(x) ? x : null;
+    var teams = [], w = [], i, p0 = 0, p1 = 1, q = [], seen = {};
+    for (i = 0; i < MAXT; i++) {
+      var t = x && Array.isArray(x.teams) && isObj(x.teams[i]) ? x.teams[i] : {}, dn = "Équipe " + COLN[i];
+      teams.push({ name: String(t.name || dn).slice(0, 20), color: clamp(toInt(t.color, i), 0, NCOL - 1) });
+      w.push(Math.max(0, toInt(x && Array.isArray(x.w) ? x.w[i] : 0, 0)));
+    }
+    if (!x && isObj(g) && isObj(g.manches)) { w[0] = Math.max(0, toInt(g.manches.a, 0)); w[1] = Math.max(0, toInt(g.manches.b, 0)); }
+    if (x && Array.isArray(x.pair)) { p0 = clamp(toInt(x.pair[0], 0), 0, MAXT - 1); p1 = clamp(toInt(x.pair[1], 1), 0, MAXT - 1); if (p0 === p1) { p0 = 0; p1 = 1; } }
+    if (x && Array.isArray(x.q)) x.q.forEach(function (v) { var k = toInt(v, -1); if (k >= 0 && k < MAXT && k !== p0 && k !== p1 && !seen[k]) { seen[k] = 1; q.push(k); } });
+    return { teams: teams, pair: [p0, p1], step: Math.max(0, toInt(x && x.step, 0)), q: q, w: w };
+  }
+  function defTeams() { return { a: { name: "Équipe rouge", color: 0 }, b: { name: "Équipe bleue", color: 1 } }; }
+  function cleanTeams(t) {
+    var d = defTeams(); t = t || {};
+    ["a", "b"].forEach(function (k) {
+      var x = t[k] || {};
+      d[k] = { name: String(x.name || d[k].name).slice(0, 20), color: clamp(toInt(x.color, d[k].color), 0, NCOL - 1) };
     });
-  });
-
-  document.getElementById("undo").addEventListener("click", function () {
-    if (!hist.length) return;
-    state = JSON.parse(hist.pop()); save(); render(); buzz();
-  });
-
-  var resetBtn = document.getElementById("reset");
-  resetBtn.addEventListener("click", function () {
-    if (!resetBtn.classList.contains("arm")) {
-      resetBtn.classList.add("arm");
-      resetBtn.textContent = "Confirmer ?";
-      clearTimeout(armTimer);
-      armTimer = setTimeout(disarm, 3000);
+    return d;
+  }
+  function defGoals() { return { score: 0, counter: 0 }; }
+  function cleanGoals(g) { g = g || {}; return { score: clamp(toInt(g.score, 0), 0, 99), counter: clamp(toInt(g.counter, 0), 0, 99) }; }
+  function defRounds() { return { mode: "none", target: 3 }; }
+  function cleanRounds(r) { r = r || {}; return { mode: (r.mode === "fixed" || r.mode === "free") ? r.mode : "none", target: clamp(toInt(r.target, 3), 1, 9) }; }
+  function cleanOver(o) {
+    if (!o || typeof o !== "object") return null;
+    return { winner: (o.winner === "a" || o.winner === "b") ? o.winner : null, rid: typeof o.rid === "string" ? o.rid.slice(0, 40) : "",
+      why: ["score", "counter", "time", "timenone", "exo", "final", "manual"].indexOf(o.why) >= 0 ? o.why : "score", locked: o.locked !== false, final: !!o.final };
+  }
+  function cleanTimer(t) {
+    t = t || {};
+    return { mode: (t.mode === "timer" || t.mode === "chrono") ? t.mode : "none", duration: clamp(toInt(t.duration, 600), 5, 5999), sound: t.sound !== false,
+      end: t.end === "none" ? "none" : "score", sanction: String(t.sanction || "").slice(0, 60), nom: String(t.nom || "").slice(0, 24) };
+  }
+  function elapsedMs() { var t = state.time; return t.elapsed + (t.startedAt ? Math.max(0, Date.now() - t.startedAt) : 0); }
+  function fmt(sec) {
+    sec = Math.max(0, sec);
+    var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    var ss = (s < 10 ? "0" : "") + s;
+    return h ? h + ":" + (m < 10 ? "0" : "") + m + ":" + ss : m + ":" + ss;
+  }
+  function ensureAudio() {
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!actx) actx = new AC();
+      if (actx.state === "suspended") actx.resume();
+    } catch (e) {}
+  }
+  function beep() {
+    if (!actx) return;
+    try {
+      var now = actx.currentTime;
+      [0, 0.35, 0.7].forEach(function (d, i) {
+        var o = actx.createOscillator(), g = actx.createGain();
+        o.type = "square"; o.frequency.value = i === 2 ? 1175 : 880;
+        g.gain.setValueAtTime(0.0001, now + d);
+        g.gain.exponentialRampToValueAtTime(0.9, now + d + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + d + 0.28);
+        o.connect(g); g.connect(actx.destination);
+        o.start(now + d); o.stop(now + d + 0.3);
+      });
+    } catch (e) {}
+  }
+  function renderTime() {
+    var c = cfg(), mode = c.timer.mode, box = $("time");
+    box.hidden = mode === "none";
+    if (mode === "none") return;
+    var t = state.time, running = !!t.startedAt, el = elapsedMs(), left = 0;
+    var gdd = !!state.guided, off = gdd && t.off && mode === "timer" && !running;
+    var canPick = gdd && mode === "timer" && !running && el === 0 && !t.done && !t.pz;
+    $("tUseL").hidden = !(canPick || off);
+    $("tUse").checked = !off;
+    $("clock").hidden = off; $("tRow").hidden = off;
+    if (off) { $("tLabel").textContent = (c.timer.nom || "Manche"); $("tAdj").hidden = true; return; }
+    $("tGo").classList.toggle("prim", !(c.exo.duration > 0));
+    if (t.pz) {
+      var pl = Math.max(0, Math.ceil((t.pz.dur * 1000 - pzMs()) / 1000));
+      $("clock").textContent = fmt(pl); $("clock").classList.remove("warn");
+      $("tLabel").textContent = "Mise en place";
+      $("tGo").textContent = "Lancer la manche"; $("tGo").disabled = false; $("tAdj").hidden = true;
       return;
     }
-    snap();
-    state.a.score = 0; state.a.pompes = 0; state.b.score = 0; state.b.pompes = 0;
-    save(); disarm(); render(); buzz();
+    if (mode === "timer") { left = Math.max(0, Math.ceil((t.duration * 1000 - el) / 1000)); $("clock").textContent = fmt(left); }
+    else $("clock").textContent = fmt(Math.floor(el / 1000));
+    $("clock").classList.toggle("warn", mode === "timer" && (t.done || (running && left <= 10)));
+    $("tLabel").textContent = c.timer.nom || (mode === "chrono" ? "Chrono" : "Manche");
+    var go = $("tGo");
+    go.textContent = running ? "Pause" : (t.done ? "Terminé" : (el > 0 ? "Reprendre" : (state.guided ? "Lancer la manche" : "Démarrer")));
+    go.disabled = (mode === "timer" && t.done) || !!state.game.over;
+    $("tAdj").hidden = !(mode === "timer" && !running && !t.done && el === 0);
+  }
+  function startTime() {
+    var t = state.time;
+    if (t.startedAt || state.game.over || (t.done && cfg().timer.mode === "timer") || (state.guided && t.off)) return;
+    ensureAudio(); t.startedAt = Date.now(); save(); renderTime();
+  }
+  function pauseTime() {
+    var t = state.time; if (!t.startedAt) return;
+    t.elapsed = elapsedMs(); t.startedAt = null; save(); renderTime();
+  }
+  function resetTime() {
+    var t = state.time;
+    t.elapsed = 0; t.startedAt = null; t.done = false; t.w1 = false; t.pz = null; t.duration = cfg().timer.duration; save(); renderTime();
+  }
+  function finishTime() {
+    var t = state.time, g = state.game;
+    t.elapsed = t.duration * 1000; t.startedAt = null; t.done = true;
+    if (!g.over) {
+      var none = cfg().timer.end === "none" || !!cfg().solo;
+      g.over = { winner: none ? null : liveWinner(), why: none ? "timenone" : "time", locked: true, final: false };
+    }
+    if (chainOn() && !state.exo.done) startPause();
+    save(); alertEnd(); render();
+  }
+  function tick() {
+    tickExo();
+    if (typeof renderPreClock === "function") renderPreClock();
+    if (state.guided) renderGuidedLive();
+    var t = state.time;
+    if (t.pz) {
+      if (t.pz.t0 && pzMs() >= t.pz.dur * 1000) { chainNext(); return; }
+      renderTime(); return;
+    }
+    if (!t.startedAt) return;
+    if (cfg().timer.mode === "timer" && elapsedMs() >= t.duration * 1000) { finishTime(); return; }
+    if (cfg().timer.mode === "timer" && !t.w1 && t.duration > 90 && t.duration * 1000 - elapsedMs() <= 60000) { t.w1 = true; save(); warnAlert(); }
+    renderTime();
+  }
+  /* ---------- Timer d'exercice, signal, alertes ---------- */
+  var sigMsg = "", sigUntil = 0;
+  function beepSeq(list) {
+    if (!actx || !cfg().timer.sound) return;
+    try {
+      var now = actx.currentTime;
+      list.forEach(function (x) {
+        var o = actx.createOscillator(), g = actx.createGain();
+        o.type = "square"; o.frequency.value = x[1];
+        g.gain.setValueAtTime(0.0001, now + x[0]);
+        g.gain.exponentialRampToValueAtTime(0.85, now + x[0] + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + x[0] + x[2]);
+        o.connect(g); g.connect(actx.destination);
+        o.start(now + x[0]); o.stop(now + x[0] + x[2] + 0.02);
+      });
+    } catch (e) {}
+  }
+  function vib(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
+  function warnAlert() { beepSeq([[0, 660, 0.2]]); vib([150]); }
+  function softAlert() { beepSeq([[0, 988, 0.15], [0.25, 988, 0.15]]); vib([200, 100, 200]); }
+  function loudSignal() { beepSeq([[0, 1175, 0.22], [0.3, 1175, 0.22], [0.6, 1175, 0.22], [1.1, 880, 0.4]]); vib([400, 150, 400, 150, 700]); }
+  /* heures des signaux, en secondes, recalculées d'après la durée actuelle de l'exercice */
+  function sigTimes(c, dur) {
+    var s = c && c.signal, out = [], k;
+    if (!s || !(dur > 0)) return out;
+    if (s.half) { out.push(Math.round(dur / 2)); return out; }
+    if (!(s.every > 0)) return out;
+    for (k = 1; k * s.every * 60 <= dur - s.every * 30 && out.length < 12; k++) out.push(Math.round(k * s.every * 60));
+    return out;
+  }
+  function sigList(c, dur) {
+    var out = sigTimes(c, dur).map(function (t) { return { t: t, label: c.signal.label }; });
+    ((c.signal && c.signal.at) || []).forEach(function (a) { if (dur > 0 && a.t * 60 < dur) out.push({ t: Math.round(a.t * 60), label: a.label }); });
+    out.sort(function (a, b) { return a.t - b.t; });
+    return out;
+  }
+  function sigFired(c, dur, ms) { var n = 0; sigList(c, dur).forEach(function (x) { if (ms >= x.t * 1000) n++; }); return n; }
+  function exoMs() { var e = state.exo; return e.elapsed + (e.startedAt ? Math.max(0, Date.now() - e.startedAt) : 0); }
+  function exoEnded() { var o = state.game.over; return !!(o && o.why === "exo" && o.final); }
+  function startExo() {
+    var e = state.exo; if (e.startedAt || e.done || !e.duration) return;
+    ensureAudio(); e.startedAt = Date.now(); save(); renderExo();
+  }
+  function pauseExo() { var e = state.exo; if (!e.startedAt) return; e.elapsed = exoMs(); e.startedAt = null; save(); renderExo(); }
+  function resetExo() {
+    var e = state.exo, d = cfg().exo.duration;
+    e.elapsed = 0; e.startedAt = null; e.done = false; e.sig = 0; e.w1 = false; e.duration = d;
+    sigUntil = 0; save(); renderExo();
+  }
+  function showSignal(label) { sigMsg = label || "Signal !"; sigUntil = Date.now() + 20000; loudSignal(); }
+  function finishExo() {
+    var e = state.exo, g = state.game, c = cfg();
+    e.elapsed = e.duration * 1000; e.startedAt = null; e.done = true; sigUntil = 0;
+    pauseTime(); state.time.pz = null;
+    if (!g.over) {
+      var rec = hasPlay() ? record("exo", null, false, c) : null;
+      g.over = { winner: null, why: "exo", locked: true, final: true, rid: rec ? rec.id : "" };
+    }
+    clearHist();
+    save(); alertEnd(true); render();
+  }
+  function tickExo() {
+    var c = cfg(), e = state.exo;
+    if (c.exo.duration > 0 && e.startedAt) {
+      var ms = exoMs();
+      if (ms >= e.duration * 1000) { finishExo(); return; }
+      var changed = false;
+      if (!e.w1 && e.duration > 90 && e.duration * 1000 - ms <= 60000) { e.w1 = true; changed = true; warnAlert(); }
+      var idx = sigFired(c, e.duration, ms);
+      if (idx > e.sig) { var sl = sigList(c, e.duration); showSignal((sl[idx - 1] && sl[idx - 1].label) || c.signal.label); e.sig = idx; changed = true; }
+      if (changed) save();
+    }
+    renderExo();
+  }
+  function renderExo() {
+    var c = cfg(), e = state.exo, box = $("exo");
+    box.hidden = !(c.exo.duration > 0);
+    if (!box.hidden) {
+      var ms = exoMs(), running = !!e.startedAt;
+      var left = Math.max(0, Math.ceil((e.duration * 1000 - ms) / 1000));
+      $("exoClock").textContent = fmt(left);
+      box.classList.toggle("warn", e.done || (running && left <= 60 && e.duration > 90));
+      $("eGo").textContent = running ? "Pause" : (e.done ? "Terminé" : (ms > 0 ? "Reprendre" : "Démarrer"));
+      $("eGo").disabled = e.done;
+      $("eAdj").hidden = !(!running && !e.done);
+    }
+    var show = !!(sigMsg && Date.now() < sigUntil);
+    $("sig").hidden = !show;
+    if (show) $("sigTxt").textContent = sigMsg;
+  }
+  function renderPal() {
+    var g = state.game, p = g.pal, c = cfg();
+    $("pal").hidden = !p;
+    if (!p) return;
+    $("ptxt").textContent = "Palier : " + teamName(p.t) + " — " + (c.palier.msg || "palier atteint") + " (" + (c.counter.name || "Compteur 2") + " : " + p.v + ")";
+    var gains = c.palier.gains || [];
+    $("pgains").hidden = !gains.length;
+    $("pgains").innerHTML = gains.map(function (x, i) { return '<button type="button" data-gain="' + i + '">' + (gains.length > 1 ? "Récompense : " : "") + esc(x) + '</button>'; }).join("");
+    $("pOk").textContent = gains.length ? "Pas maintenant" : "OK";
+  }
+  /* ---------- Fin de manche (objectifs, manches, verrouillage) ---------- */
+  function overW(o) {
+    if (cfg().solo) return o.why === "score" ? "a" : null;
+    return (o.why === "time" || o.why === "manual") ? liveWinner() : o.winner;
+  }
+  function liveWinner() {
+    var g = state.game;
+    return g.a.score > g.b.score ? "a" : (g.b.score > g.a.score ? "b" : null);
+  }
+  function teamNameOf(c, t) { var x = tmOf(c, t); return (x && x.name) || (t === "a" ? "Équipe 1" : "Équipe 2"); }
+  function teamName(t) { return teamNameOf(cfg(), t); }
+  function overText() {
+    var g = state.game, o = g.over, c = cfg(), w;
+    if (c.solo) {
+      var ob = c.goals.score > 0 ? " sur " + c.goals.score : "", sc1 = g.a.score;
+      if (o.why === "exo") return "Exercice terminé ! " + sc1 + " paniers";
+      if (o.why === "score") return "Manche réussie ! " + sc1 + " paniers" + (c.timer.mode === "timer" && !state.time.off ? " en " + fmt(Math.round(elapsedMs() / 1000)) : "");
+      if (o.why === "timenone" || o.why === "time") return "Manche perdue : temps écoulé (" + sc1 + " paniers" + ob + ")";
+      return "Manche terminée : " + sc1 + " paniers" + ob;
+    }
+    if (o.why === "exo") {
+      var sc = g.a.score || g.b.score ? " (" + g.a.score + " – " + g.b.score + ")" : "";
+      return "Exercice terminé !" + sc;
+    }
+    if (o.final) {
+      w = o.winner; var other = w === "a" ? "b" : "a";
+      return "Victoire finale : " + teamName(w) + " (" + g.manches[w] + " manches à " + g.manches[other] + ")";
+    }
+    if (o.why === "manual") {
+      w = liveWinner();
+      if (!w) return "Manche terminée. Égalité (" + g.a.score + " – " + g.b.score + ")";
+      return "Manche terminée ! Gagnant : " + teamName(w) + " (" + g[w].score + " – " + g[w === "a" ? "b" : "a"].score + ")";
+    }
+    if (o.why === "timenone") return "Temps écoulé ! Personne ne gagne : les deux équipes perdent" + (c.timer.sanction ? " — " + c.timer.sanction : "");
+    if (o.why === "time") {
+      w = liveWinner();
+      if (!w) return "Temps écoulé ! Égalité (" + g.a.score + " – " + g.b.score + ")";
+      return "Temps écoulé ! Gagnant : " + teamName(w) + " (" + g[w].score + " – " + g[w === "a" ? "b" : "a"].score + ")";
+    }
+    w = o.winner;
+    if (o.why === "counter") return "Objectif atteint ! Gagnant : " + teamName(w) + " (" + (c.counter.name || "Compteur 2") + " : " + g[w].counter + ")";
+    return "Objectif atteint ! Gagnant : " + teamName(w) + " (" + g[w].score + " points)";
+  }
+  function renderOver() {
+    var g = state.game, o = g.over, box = $("over");
+    $("teams").classList.toggle("locked", !!(o && o.locked));
+    if (!o) { box.hidden = true; return; }
+    box.hidden = false;
+    $("otxt").textContent = overText();
+    $("oNext").textContent = o.why === "exo" ? "Nouvel exercice" : (o.final ? "Nouvelle partie" : (roundsMode(cfg()) === "none" ? "Rejouer" : "Manche suivante"));
+    renderOlg(o);
+    $("ohint").textContent = o.why === "exo" ? (o.locked ? "Exercice terminé. Pour corriger un score (panier au buzzer), touche un bouton deux fois." : "Déverrouillé : tu peux corriger les scores.") : o.locked ? "Boutons verrouillés : touche un bouton deux fois pour déverrouiller et corriger." : "Déverrouillé : tu peux corriger les scores.";
+  }
+  function alertEnd(big) {
+    if (big) { endBuzzer(); return; }
+    if (cfg().timer.sound) beep();
+    try { if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 600]); } catch (e) {}
+  }
+  function checkEnd(t) {
+    var g = state.game, c = cfg(), why = null;
+    if (g.over) return;
+    if (c.goals.score > 0 && g[t].score >= c.goals.score) why = "score";
+    else if (c.goals.counter > 0 && c.counter.enabled && g[t].counter >= c.goals.counter) why = "counter";
+    if (!why) return;
+    g.over = { winner: t, why: why, locked: true, final: false };
+    pauseTime();
+    alertEnd();
+    if (chainOn()) startPause();
+  }
+  function fullReset() {
+    var g = state.game;
+    ["a", "b"].forEach(function (t) { g[t].score = 0; g[t].counter = 0; });
+    g.manches = { a: 0, b: 0 }; g.over = null; g.rang = 0; g.pal = null; g.lost = 0; g.st = { a: {}, b: {} };
+    lgInit();
+    resetTime(); resetExo();
+  }
+  function nextRound() {
+    var g = state.game, o = g.over, c = cfg();
+    if (!o) return;
+    if (o.final && o.why === "exo") clearHist(); else snap();
+    if (o.final) { fullReset(); save(); render(); buzz(); return; }
+    var w = overW(o);
+    if (c.solo && !w) g.lost = (g.lost || 0) + 1;
+    if (w && (lgOn() || c.rounds.mode !== "none")) {
+      var wi = state.lg.pair[w === "a" ? 0 : 1];
+      state.lg.w[wi]++; g.manches[w] = state.lg.w[wi];
+    }
+    g.rang++;
+    record(o.why, w, true, c);
+    if (w && c.rounds.mode === "fixed" && g.manches[w] >= c.rounds.target) {
+      g.over = { winner: w, why: "final", locked: true, final: true };
+      save(); render(); alertEnd(); return;
+    }
+    if (state.exo.done) {
+      g.over = { winner: null, why: "exo", locked: true, final: true };
+      save(); render(); return;
+    }
+    ["a", "b"].forEach(function (t) { g[t].score = 0; g[t].counter = 0; });
+    g.over = null; g.pal = null;
+    if (lgOn()) lgAdvance(w);
+    resetTime();
+    /* manche suivante : le timer de manche repart tout seul si l'exercice tourne */
+    if (state.guided && c.timer.mode === "timer" && !state.time.off && !state.time.pz && (state.exo.startedAt || !(c.exo.duration > 0))) startTime();
+    save(); render(); buzz();
+  }
+  /* ---------- Journal des scores ---------- */
+  function context() {
+    var gd = state.guided;
+    if (!gd) return { type: "Standard", exercice: "", cycle: "", categorie: "", ordre: "", seance: "", variante: "" };
+    var b = gd.seance.blocs[gd.cur];
+    return { type: "Séance guidée", exercice: b.titre, cycle: gd.cycle.nom, categorie: gd.cycle.categorie, ordre: gd.cur + 1, seance: gd.seance.nom, variante: variantLabel(gd, gd.cur) };
+  }
+  function loadJournal() {
+    try {
+      var a = JSON.parse(localStorage.getItem(JKEY));
+      return Array.isArray(a) ? a.filter(function (e) { return e && typeof e === "object" && e.a && e.b; }) : [];
+    } catch (e) { return []; }
+  }
+  function saveJournal() { try { localStorage.setItem(JKEY, JSON.stringify(journal)); } catch (e) {} }
+  function hasPlay() {
+    var g = state.game;
+    return !!(g.a.score || g.b.score || g.a.counter || g.b.counter || elapsedMs() > 0);
+  }
+  /* enregistre une ligne ; done = manche terminée et validée ; la ligne est liée à la dernière action annulable */
+  function record(why, winner, done, c) {
+    var g = state.game, ctx = context();
+    var e = { id: uid(), ts: new Date().toISOString(), cfgId: c.id, cfg: c.name || "Sans nom",
+      ctx: ctx.type, exercice: ctx.exercice, cycle: ctx.cycle, categorie: ctx.categorie, ordre: ctx.ordre, seance: ctx.seance, variante: ctx.variante,
+      note: state.note || "", rang: done ? g.rang : 0, done: !!done, why: why, winner: winner || null, solo: !!c.solo,
+      sec: Math.round(elapsedMs() / 1000), timer: c.timer.mode, cname: c.counter.enabled ? (c.counter.name || "Compteur 2") : "",
+      a: { name: teamNameOf(c, "a"), color: tmOf(c, "a").color, score: g.a.score, counter: g.a.counter, manches: g.manches.a },
+      b: { name: teamNameOf(c, "b"), color: tmOf(c, "b").color, score: g.b.score, counter: g.b.counter, manches: g.manches.b } };
+    journal.push(e);
+    if (journal.length > 3000) journal.shift();
+    saveJournal();
+    if (histJ.length) histJ[histJ.length - 1] = e.id;
+    return e;
+  }
+  /* partie en cours abandonnée (remise à zéro, changement de configuration) : on garde une trace */
+  function recordIfPlay(why, c) {
+    var g = state.game;
+    if (g.over && g.over.final) return;
+    if (g.over) { record(g.over.why, overW(g.over), false, c); return; }
+    if (hasPlay()) record(why, null, false, c);
+  }
+  function syncTimeAfterUndo() {
+    var g = state.game, t = state.time, o = g.over;
+    t.pz = null;
+    if (cfg().timer.mode !== "timer") return;
+    if (o && (o.why === "time" || o.why === "timenone")) { t.done = true; t.startedAt = null; t.elapsed = t.duration * 1000; }
+    else if (!o && t.done) g.over = { winner: null, why: cfg().timer.end === "none" ? "timenone" : "time", locked: false, final: false };
+  }
+  $("oNext").addEventListener("click", function () { if (state.time.pz) chainNext(); else nextRound(); });
+
+  $("tReset").addEventListener("click", function () {
+    if (elapsedMs() === 0 && !state.time.done) { resetTime(); return; }
+    arm($("tReset"), "↺", resetTime);
   });
-  function disarm() {
-    clearTimeout(armTimer);
-    resetBtn.classList.remove("arm");
-    resetBtn.textContent = "Tout remettre à zéro";
+  /* retient un réglage fait en direct pour la manche en cours et les suivantes (et le garde si on réapplique les variantes) */
+  function remember(k, v) {
+    var gd = state.guided; if (!gd || gd.finished) return;
+    var id = gd.seance.blocs[gd.cur].id;
+    if (!gd.regl[id]) gd.regl[id] = {};
+    gd.regl[id][k] = v;
+  }
+  function setTimerDur(sec) {
+    var c = cfg(), t = state.time;
+    sec = clamp(Math.round(sec), 30, 5999);
+    if (t.startedAt || t.elapsed > 0) sec = Math.max(sec, Math.ceil(elapsedMs() / 1000) + 5);
+    if (state.guided) { c.timer.duration = sec; remember("min", sec / 60); }
+    if (!t.done) t.duration = sec;
+    save(); renderTime(); renderRegle();
+  }
+  $("tAdj").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    setTimerDur(state.time.duration + parseInt(b.getAttribute("data-s"), 10)); buzz();
+  });
+  $("tUse").addEventListener("change", function (e) { state.time.off = !e.target.checked; save(); render(); });
+  document.addEventListener("visibilitychange", function () { tick(); renderTime(); renderExo(); });
+  setInterval(tick, 250);
+
+  /* ---------- Écran de jeu ---------- */
+  function teamHTML(t) {
+    var c = cfg();
+    var many = c.buttons.length > 6;
+    var col = clamp(toInt(tmOf(c, t).color, 0), 0, NCOL - 1);
+    var rd = roundsMode(c) !== "none" ? (c.solo ? '<div class="man">Réussies <b id="man-' + t + '">0</b> · perdues <b id="lost-' + t + '">0</b></div>' : '<div class="man">Manches <b id="man-' + t + '">0</b>' + (c.rounds.mode === "fixed" ? " / " + c.rounds.target : "") + '</div>') : "";
+    var btns = c.buttons.map(function (x, i) {
+      if (x.gap) return '<span class="gap" aria-hidden="true"></span>';
+      if (x.reset) return '<button type="button" class="neg reset" data-t="' + t + '" data-i="' + i + '"><span>↺</span><span class="l">' + esc(x.label || "Raté") + '</span></button>';
+      var txt = (x.value < 0 ? "−" : "+") + Math.abs(x.value);
+      return '<button type="button" class="' + (x.value < 0 ? "neg" : "pos") + '" data-t="' + t + '" data-i="' + i + '"><span>' + txt + '</span>' +
+        (x.label ? '<span class="l">' + esc(x.label) + '</span>' : "") + '</button>';
+    }).join("");
+    var cnt = "";
+    if (c.counter.enabled) {
+      var st = c.counter.step;
+      cnt = '<div class="cnt"><div class="label"><span>' + esc(c.counter.name || "Compteur") + '</span><span class="n" id="cnt-' + t + '">0</span></div>' +
+        '<div class="cbtns"><button class="add" type="button" data-t="' + t + '" data-c="1">+' + st + '</button>' +
+        '<button class="less" type="button" data-t="' + t + '" data-c="-1">−' + st + '</button></div></div>';
+    }
+    return '<section class="team" data-team="' + t + '" style="--c: var(--p' + col + ')">' +
+      '<input class="name" id="name-' + t + '" type="text" maxlength="20" aria-label="Nom de l\'équipe">' + rd +
+      '<div class="score" id="score-' + t + '" aria-live="polite">0</div>' +
+      '<div class="btns' + (many ? " many" : "") + '">' + btns + '</div>' + cnt + '</section>';
+  }
+  function buildTeams() {
+    $("teams").innerHTML = teamHTML("a") + teamHTML("b");
+    $("teams").classList.toggle("solo", !!cfg().solo);
+    $("cfgPlay").innerHTML = state.configs.map(function (o) {
+      return '<option value="' + esc(o.id) + '"' + (o.id === state.activeId ? " selected" : "") + '>' + esc(o.name || "Sans nom") + '</option>';
+    }).join("");
+    render();
+  }
+  function render() {
+    ["a", "b"].forEach(function (t) {
+      $("score-" + t).textContent = state.game[t].score;
+      var n = $("cnt-" + t); if (n) n.textContent = state.game[t].counter;
+      var mm = $("man-" + t); if (mm) mm.textContent = state.game.manches[t];
+      var ll = $("lost-" + t); if (ll) ll.textContent = state.game.lost || 0;
+      var inp = $("name-" + t);
+      var tmx = tmOf(cfg(), t);
+      if (inp && document.activeElement !== inp) inp.value = tmx.name;
+      var tel = document.querySelector('.team[data-team="' + t + '"]');
+      if (tel) tel.style.setProperty("--c", "var(--p" + clamp(toInt(tmx.color, 0), 0, NCOL - 1) + ")");
+    });
+    var canUndo = hist.length > 0;
+    $("undo").disabled = !canUndo;
+    $("undo").style.opacity = canUndo ? 1 : .45;
+    renderTime();
+    renderExo();
+    renderPal();
+    renderOver();
+    $("endRound").hidden = !(roundsMode(cfg()) !== "none" && !state.game.over && !cfg().noscore);
+    renderLg();
+    renderChainHint();
+    renderGuided();
   }
 
-  render();
+  var unlockArm = 0;
+  function incSt(t, key, d) {
+    var g = state.game; if (!state.guided) return;
+    if (!g.st) g.st = { a: {}, b: {} };
+    if (!g.st[t]) g.st[t] = {};
+    var m = g.st[t], n = (m[key] || 0) + d;
+    if (n > 0) { if (m[key] || Object.keys(m).length < 40) m[key] = Math.min(n, 9999); } else delete m[key];
+  }
+  /* après la fin de l'exercice, une correction de score met aussi à jour la ligne du journal */
+  function syncExoRec() {
+    var g = state.game, o = g.over;
+    if (!o || !o.rid) return;
+    for (var i = journal.length - 1; i >= 0; i--) {
+      if (journal[i].id === o.rid) {
+        journal[i].a.score = g.a.score; journal[i].b.score = g.b.score; journal[i].a.counter = g.a.counter; journal[i].b.counter = g.b.counter;
+        saveJournal(); return;
+      }
+    }
+  }
+  $("teams").addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    ensureAudio();
+    var t = b.getAttribute("data-t"), g = state.game[t], c = cfg(), o = state.game.over, unlocking = false, palier = false;
+    if (o && o.locked) {
+      if (Date.now() - unlockArm < 3000) unlocking = true;
+      else {
+        unlockArm = Date.now(); buzz();
+        $("ohint").textContent = "Touche encore une fois pour déverrouiller et ajouter.";
+        setTimeout(renderOver, 3000);
+        return;
+      }
+    }
+    if (b.hasAttribute("data-i")) {
+      var x = c.buttons[parseInt(b.getAttribute("data-i"), 10)];
+      if (!x || x.gap) return;
+      var n = x.reset ? 0 : g.score + x.value;
+      if (!c.allowNegative && n < 0) n = 0;
+      if (n === g.score) return;
+      snap(); g.score = n;
+      incSt(t, x.label || (x.reset ? "Raté" : (x.value < 0 ? "−" : "+") + Math.abs(x.value)), 1);
+    } else if (b.hasAttribute("data-c")) {
+      var m = Math.max(0, g.counter + parseInt(b.getAttribute("data-c"), 10) * c.counter.step);
+      if (m === g.counter) return;
+      snap();
+      incSt(t, c.counter.name || "Compteur 2", m > g.counter ? 1 : -1);
+      var ev = c.palier.every;
+      if (ev > 0 && m > g.counter && Math.floor(m / ev) > Math.floor(g.counter / ev)) { state.game.pal = { t: t, v: m }; palier = true; }
+      g.counter = m;
+    } else return;
+    if (unlocking) { o.locked = false; unlockArm = 0; }
+    checkEnd(t);
+    syncExoRec();
+    save(); render(); buzz();
+    if (palier) softAlert();
+  });
+  $("pOk").addEventListener("click", function () { state.game.pal = null; save(); renderPal(); });
+  $("pgains").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-gain]"), p = state.game.pal; if (!b || !p) return;
+    var gains = cfg().palier.gains || [], x = gains[parseInt(b.getAttribute("data-gain"), 10)];
+    if (!x) return;
+    snap(); incSt(p.t, "Récompense : " + x, 1); state.game.pal = null; save(); render(); buzz();
+  });
+  $("sigOk").addEventListener("click", function () { sigUntil = 0; renderExo(); });
+  $("eReset").addEventListener("click", function () {
+    if (exoMs() === 0 && !state.exo.done) { resetExo(); return; }
+    arm($("eReset"), "↺", function () { if (!exoEnded()) resetExo(); else resetExo(); });
+  });
+  $("eAdj").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    var x = state.exo; x.duration = clamp(x.duration + parseInt(b.getAttribute("data-s"), 10), Math.max(60, Math.ceil(exoMs() / 1000) + 30), 21600); save(); renderExo(); renderRegle(); buzz();
+  });
+  $("teams").addEventListener("input", function (e) {
+    var el = e.target;
+    if (el.id === "name-a" || el.id === "name-b") { tmSet(slotTeam(el.id.slice(-1)), "name", el.value.slice(0, 20)); save(); }
+  });
+  $("cfgPlay").addEventListener("change", function (e) {
+    var old = cfg();
+    recordIfPlay("config", old);
+    state.activeId = e.target.value; switchReset(); buildTeams();
+  });
+  function switchReset() {
+    var g = state.game;
+    ["a", "b"].forEach(function (t) { g[t].score = 0; g[t].counter = 0; });
+    g.manches = { a: 0, b: 0 }; g.over = null; g.rang = 0; g.pal = null; g.lost = 0; g.st = { a: {}, b: {} }; lgInit(); clearHist(); resetTime(); resetExo();
+  }
+  $("undo").addEventListener("click", function () {
+    if (!hist.length) return;
+    var hs = JSON.parse(hist.pop()), tms = state.lg.teams;
+    state.game = hs.g; state.lg = cleanLg(hs.l); state.lg.teams = tms; lgEnsure();
+    var jid = histJ.pop();
+    if (jid) { journal = journal.filter(function (e) { return e.id !== jid; }); saveJournal(); }
+    syncTimeAfterUndo(); save(); render(); buzz();
+  });
+
+  function arm(btn, idle, onConfirm) {
+    var id = btn.id;
+    if (!btn.classList.contains("arm")) {
+      btn.classList.add("arm"); btn.textContent = "Confirmer ?";
+      clearTimeout(armTimers[id]);
+      armTimers[id] = setTimeout(function () { disarm(btn, idle); }, 3000);
+      return;
+    }
+    disarm(btn, idle); onConfirm();
+  }
+  function disarm(btn, idle) { clearTimeout(armTimers[btn.id]); btn.classList.remove("arm"); btn.textContent = idle; }
+
+  function resetLabel() { return state.guided ? "Remettre l'exercice à zéro" : "Tout remettre à zéro"; }
+  $("reset").addEventListener("click", function () {
+    arm($("reset"), resetLabel(), function () {
+      snap();
+      recordIfPlay("reset", cfg());
+      fullReset();
+      save(); render(); buzz();
+    });
+  });
+
+  $("note").value = state.note || "";
+  $("note").addEventListener("input", function (e) { state.note = e.target.value.slice(0, 60); save(); });
+
+  /* ---------- Réglages ---------- */
+  var settingsSnapT = "", settingsSnapE = "", settingsId = "";
+  function snapT() { return JSON.stringify([cfg().timer.mode, cfg().timer.duration]); }
+  function snapE() { return JSON.stringify([cfg().exo.duration]); }
+  function showSettings(on) {
+    $("play").hidden = on; $("settings").hidden = !on;
+    if (on) { pauseTime(); pausePz(); settingsSnapT = snapT(); settingsSnapE = snapE(); settingsId = state.activeId; renderSettings(); }
+    else {
+      if (state.activeId !== settingsId) {
+        var oldCfg = state.configs.filter(function (o) { return o.id === settingsId; })[0];
+        if (oldCfg) recordIfPlay("config", oldCfg);
+        switchReset();
+      } else {
+        if (snapT() !== settingsSnapT) resetTime();
+        if (snapE() !== settingsSnapE) resetExo();
+      }
+      buildTeams();
+      resumePz();
+    }
+    window.scrollTo(0, 0);
+  }
+  $("gear").addEventListener("click", function () { showSettings(true); });
+  $("back").addEventListener("click", function () { showSettings(false); });
+
+  function renderSettings() {
+    var c = cfg();
+    $("cfgCard").hidden = !!state.guided; $("gNote").hidden = !state.guided;
+    $("cfgSel").innerHTML = state.configs.map(function (o) {
+      return '<option value="' + esc(o.id) + '"' + (o.id === c.id ? " selected" : "") + '>' + esc(o.name || "Sans nom") + '</option>';
+    }).join("");
+    $("cfgName").value = c.name;
+    $("cfgDel").disabled = state.configs.length < 2;
+    renderTeamsUi();
+    $("brows").innerHTML = c.buttons.map(function (x, i) {
+      if (x.gap) {
+        return '<div class="brow" data-i="' + i + '">' +
+          '<div class="note" style="grid-column: 1 / -1; font-size:15px">Case vide (ne compte rien)</div>' +
+          '<div class="acts">' +
+            '<button type="button" data-act="up" aria-label="Monter"' + (i === 0 ? " disabled" : "") + '>▲</button>' +
+            '<button type="button" data-act="down" aria-label="Descendre"' + (i === c.buttons.length - 1 ? " disabled" : "") + '>▼</button>' +
+            '<button type="button" data-act="del" aria-label="Supprimer la case"' + (c.buttons.length < 2 ? " disabled" : "") + '>✕</button>' +
+          '</div></div>';
+      }
+      if (x.reset) {
+        return '<div class="brow" data-i="' + i + '">' +
+          '<div class="field rsym" aria-hidden="true">↺</div>' +
+          '<input class="field lab" style="grid-column: 2 / -1" type="text" maxlength="24" placeholder="Raté (remet le score à zéro)" value="' + esc(x.label) + '" aria-label="Nom du bouton Raté">' +
+          '<div class="acts">' +
+            '<button type="button" data-act="up" aria-label="Monter"' + (i === 0 ? " disabled" : "") + '>▲</button>' +
+            '<button type="button" data-act="down" aria-label="Descendre"' + (i === c.buttons.length - 1 ? " disabled" : "") + '>▼</button>' +
+            '<button type="button" data-act="del" aria-label="Supprimer le bouton"' + (c.buttons.length < 2 ? " disabled" : "") + '>✕</button>' +
+          '</div></div>';
+      }
+      return '<div class="brow" data-i="' + i + '">' +
+        '<button type="button" class="sign" data-act="sign" aria-label="Changer le signe">' + (x.value < 0 ? "−" : "+") + '</button>' +
+        '<input class="field val" type="number" inputmode="numeric" min="1" max="99" value="' + Math.abs(x.value) + '" aria-label="Valeur du bouton">' +
+        '<input class="field lab" type="text" maxlength="24" placeholder="Nom (facultatif)" value="' + esc(x.label) + '" aria-label="Nom du bouton">' +
+        '<div class="acts">' +
+          '<button type="button" data-act="up" aria-label="Monter"' + (i === 0 ? " disabled" : "") + '>▲</button>' +
+          '<button type="button" data-act="down" aria-label="Descendre"' + (i === c.buttons.length - 1 ? " disabled" : "") + '>▼</button>' +
+          '<button type="button" data-act="del" aria-label="Supprimer le bouton"' + (c.buttons.length < 2 ? " disabled" : "") + '>✕</button>' +
+        '</div></div>';
+    }).join("");
+    $("bcount").textContent = "(" + c.buttons.length + " sur " + MAXB + ")";
+    $("addBtn").disabled = c.buttons.length >= MAXB;
+    $("addGap").disabled = c.buttons.length >= MAXB;
+    $("addReset").disabled = c.buttons.length >= MAXB;
+    $("negChk").checked = c.allowNegative;
+    $("cntChk").checked = c.counter.enabled;
+    $("cntName").value = c.counter.name;
+    $("cntStep").value = c.counter.step;
+    var tm = c.timer;
+    $("tMode").value = tm.mode;
+    $("tTimerOpts").hidden = tm.mode !== "timer";
+    $("tMin").value = Math.floor(tm.duration / 60);
+    $("tSec").value = tm.duration % 60;
+    $("tSound").checked = tm.sound;
+    $("tEndRow").hidden = tm.mode !== "timer";
+    $("tEnd").value = tm.end;
+    $("tSanction").hidden = tm.end !== "none";
+    $("tSanction").value = tm.sanction;
+    $("tNomRow").hidden = tm.mode === "none";
+    if (document.activeElement !== $("tNom")) $("tNom").value = tm.nom;
+    $("chRow").hidden = tm.mode !== "timer";
+    $("chChk").checked = c.enchainement.actif;
+    $("chPauseRow").hidden = !c.enchainement.actif;
+    if (document.activeElement !== $("chPause")) $("chPause").value = c.enchainement.pause;
+    var ed = c.exo.duration;
+    if (document.activeElement !== $("eMin")) $("eMin").value = Math.floor(ed / 60);
+    if (document.activeElement !== $("eSec")) $("eSec").value = ed % 60;
+    if (document.activeElement !== $("sEvery")) $("sEvery").value = c.signal.every || "";
+    if (document.activeElement !== $("sLabel")) $("sLabel").value = c.signal.label;
+    renderGoalsUi();
+  }
+  function swHTML(attr, cur) {
+    var h = "";
+    for (var k = 0; k < NCOL; k++) {
+      h += '<button type="button" ' + attr + ' data-col="' + k + '" style="background: var(--p' + k + ')" aria-label="Couleur ' + (k + 1) + '"' +
+        (cur === k ? ' class="sel" aria-pressed="true">✓' : ' aria-pressed="false">') + '</button>';
+    }
+    return h;
+  }
+  function renderTeamsUi() {
+    var c = cfg(), n = lgN(c), more = "", k;
+    ["a", "b"].forEach(function (t, idx) {
+      var tm = tmRead(idx), inp = $("tmName-" + t);
+      if (document.activeElement !== inp) inp.value = tm.name;
+      $("sw-" + t).innerHTML = swHTML('data-tm="' + t + '"', tm.color);
+    });
+    for (k = 2; k < n; k++) {
+      var tx = tmRead(k);
+      more += '<div class="tmblock"><input class="field" type="text" maxlength="20" data-ti="' + k + '" value="' + esc(tx.name) + '" placeholder="Nom de l\'équipe ' + (k + 1) + '" aria-label="Nom de l\'équipe ' + (k + 1) + '">' +
+        '<div class="sw" role="group" aria-label="Couleur de l\'équipe ' + (k + 1) + '">' + swHTML('data-ti="' + k + '"', tx.color) + '</div></div>';
+    }
+    var key = n + "|", box = $("tmMore");
+    for (k = 2; k < n; k++) key += tmRead(k).color + ",";
+    if (box.getAttribute("data-k") !== key || !box.contains(document.activeElement)) { box.innerHTML = more; box.setAttribute("data-k", key); }
+    $("eqN").value = String(n);
+    $("eqMode").value = c.equipes.mode;
+  }
+  ["a", "b"].forEach(function (t, idx) {
+    $("tmName-" + t).addEventListener("input", function (e) { tmSet(slotIdx(idx), "name", e.target.value.slice(0, 20)); save(); });
+    $("sw-" + t).addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b) return;
+      tmSet(slotIdx(idx), "color", parseInt(b.getAttribute("data-col"), 10)); save(); renderTeamsUi();
+    });
+  });
+  function slotIdx(idx) { return idx; }
+  function renderGoalsUi() {
+    var c = cfg();
+    $("gScore").value = c.goals.score || "";
+    $("gCnt").value = c.goals.counter || "";
+    $("gCntLbl").hidden = !c.counter.enabled;
+    $("pRow").hidden = !c.counter.enabled;
+    $("pEvery").value = c.palier.every || "";
+    $("pMsg").value = c.palier.msg;
+    $("gCntName").textContent = c.counter.name || "Compteur 2";
+    $("rMode").value = c.rounds.mode;
+    $("rTargetRow").hidden = c.rounds.mode !== "fixed";
+    $("rTarget").value = c.rounds.target;
+  }
+
+  $("cfgSel").addEventListener("change", function (e) { state.activeId = e.target.value; save(); renderSettings(); });
+  $("cfgName").addEventListener("input", function (e) {
+    var c = cfg(); c.name = e.target.value; save();
+    var o = $("cfgSel").options[$("cfgSel").selectedIndex]; if (o) o.textContent = c.name || "Sans nom";
+  });
+  $("cfgNew").addEventListener("click", function () {
+    var c = blank("Configuration " + (state.configs.length + 1));
+    state.configs.push(c); state.activeId = c.id; save(); renderSettings(); buzz();
+  });
+  $("cfgDup").addEventListener("click", function () {
+    var c = JSON.parse(JSON.stringify(cfg()));
+    c.id = uid(); c.name = (c.name || "Sans nom").slice(0, 22) + " (copie)";
+    state.configs.push(c); state.activeId = c.id; save(); renderSettings(); buzz();
+  });
+  $("cfgDel").addEventListener("click", function () {
+    if (state.configs.length < 2) return;
+    arm($("cfgDel"), "Supprimer", function () {
+      var id = state.activeId;
+      state.configs = state.configs.filter(function (o) { return o.id !== id; });
+      state.activeId = state.configs[0].id; save(); renderSettings(); buzz();
+    });
+  });
+  $("addBtn").addEventListener("click", function () {
+    var c = cfg(); if (c.buttons.length >= MAXB) return;
+    c.buttons.push({ label: "", value: 1 }); save(); renderSettings(); buzz();
+  });
+
+  $("addReset").addEventListener("click", function () {
+    var c = cfg(); if (c.buttons.length >= MAXB) return;
+    c.buttons.push({ label: "Raté", value: 0, reset: true }); save(); renderSettings(); buzz();
+  });
+  $("addGap").addEventListener("click", function () {
+    var c = cfg(); if (c.buttons.length >= MAXB) return;
+    c.buttons.push({ label: "", value: 0, gap: true }); save(); renderSettings(); buzz();
+  });
+
+  $("brows").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    var row = b.closest(".brow"); if (!row) return;
+    var c = cfg(), i = parseInt(row.getAttribute("data-i"), 10), act = b.getAttribute("data-act");
+    if (act === "sign") {
+      c.buttons[i].value = -c.buttons[i].value; b.textContent = c.buttons[i].value < 0 ? "−" : "+"; save();
+    } else if (act === "up" && i > 0) {
+      c.buttons.splice(i - 1, 0, c.buttons.splice(i, 1)[0]); save(); renderSettings();
+    } else if (act === "down" && i < c.buttons.length - 1) {
+      c.buttons.splice(i + 1, 0, c.buttons.splice(i, 1)[0]); save(); renderSettings();
+    } else if (act === "del" && c.buttons.length > 1) {
+      var rest = c.buttons.filter(function (x, j) { return j !== i && !x.gap && !x.reset; });
+      if (!rest.length) return;
+      c.buttons.splice(i, 1); save(); renderSettings();
+    }
+  });
+  $("brows").addEventListener("input", function (e) {
+    var el = e.target, row = el.closest(".brow"); if (!row) return;
+    var x = cfg().buttons[parseInt(row.getAttribute("data-i"), 10)]; if (!x || x.gap) return;
+    if (el.classList.contains("lab")) { x.label = el.value; save(); }
+    else if (el.classList.contains("val")) {
+      var n = parseInt(el.value, 10);
+      if (!isNaN(n) && n >= 1) { x.value = (x.value < 0 ? -1 : 1) * clamp(n, 1, 99); save(); }
+    }
+  });
+  $("brows").addEventListener("change", function (e) {
+    var el = e.target; if (!el.classList.contains("val")) return;
+    var row = el.closest(".brow"), x = cfg().buttons[parseInt(row.getAttribute("data-i"), 10)]; if (!x || x.gap) return;
+    var n = clamp(toInt(el.value, 1), 1, 99);
+    x.value = (x.value < 0 ? -1 : 1) * n; el.value = n; save();
+  });
+
+  $("negChk").addEventListener("change", function (e) { cfg().allowNegative = e.target.checked; save(); });
+  $("cntChk").addEventListener("change", function (e) { cfg().counter.enabled = e.target.checked; save(); renderGoalsUi(); });
+  $("cntName").addEventListener("input", function (e) { cfg().counter.name = e.target.value; save(); $("gCntName").textContent = e.target.value || "Compteur 2"; });
+  $("gScore").addEventListener("input", function (e) { cfg().goals.score = clamp(toInt(e.target.value, 0), 0, 99); save(); });
+  $("gCnt").addEventListener("input", function (e) { cfg().goals.counter = clamp(toInt(e.target.value, 0), 0, 99); save(); });
+  $("gScore").addEventListener("change", function (e) { var n = clamp(toInt(e.target.value, 0), 0, 99); e.target.value = n || ""; });
+  $("gCnt").addEventListener("change", function (e) { var n = clamp(toInt(e.target.value, 0), 0, 99); e.target.value = n || ""; });
+  $("rMode").addEventListener("change", function (e) { cfg().rounds.mode = e.target.value; save(); renderGoalsUi(); });
+  $("rTarget").addEventListener("input", function (e) { var n = parseInt(e.target.value, 10); if (!isNaN(n) && n >= 1) { cfg().rounds.target = clamp(n, 1, 9); save(); } });
+  $("rTarget").addEventListener("change", function (e) { var n = clamp(toInt(e.target.value, 3), 1, 9); cfg().rounds.target = n; e.target.value = n; save(); });
+  $("cntStep").addEventListener("input", function (e) {
+    var n = parseInt(e.target.value, 10); if (!isNaN(n) && n >= 1) { cfg().counter.step = clamp(n, 1, 99); save(); }
+  });
+  $("cntStep").addEventListener("change", function (e) {
+    var n = clamp(toInt(e.target.value, 1), 1, 99); cfg().counter.step = n; e.target.value = n; save();
+  });
+
+  $("tMode").addEventListener("change", function (e) { cfg().timer.mode = e.target.value; save(); renderSettings(); });
+  function setDur() {
+    var m = clamp(toInt($("tMin").value, 0), 0, 99), sec = clamp(toInt($("tSec").value, 0), 0, 59);
+    cfg().timer.duration = clamp(m * 60 + sec, 5, 5999); save();
+  }
+  function normField(el, hi) { el.value = clamp(toInt(el.value, 0), 0, hi); setDur(); }
+  $("tMin").addEventListener("input", setDur);
+  $("tSec").addEventListener("input", setDur);
+  $("tMin").addEventListener("change", function (e) { normField(e.target, 99); });
+  $("tSec").addEventListener("change", function (e) { normField(e.target, 59); });
+  $("tSound").addEventListener("change", function (e) { cfg().timer.sound = e.target.checked; save(); });
+  $("tEnd").addEventListener("change", function (e) { cfg().timer.end = e.target.value === "none" ? "none" : "score"; save(); renderSettings(); });
+  $("tSanction").addEventListener("input", function (e) { cfg().timer.sanction = e.target.value.slice(0, 60); save(); });
+  function setExoDur() {
+    var m = clamp(toInt($("eMin").value, 0), 0, 99), sec = clamp(toInt($("eSec").value, 0), 0, 59), d = m * 60 + sec;
+    cfg().exo.duration = d > 0 ? clamp(d, 30, 21600) : 0; save();
+  }
+  function normExo(el, hi) {
+    el.value = clamp(toInt(el.value, 0), 0, hi); setExoDur();
+    var d = cfg().exo.duration;
+    if (el.id === "eMin") $("eMin").value = Math.floor(d / 60); else $("eSec").value = d % 60;
+  }
+  $("eMin").addEventListener("input", setExoDur);
+  $("eSec").addEventListener("input", setExoDur);
+  $("eMin").addEventListener("change", function (e) { normExo(e.target, 99); });
+  $("eSec").addEventListener("change", function (e) { normExo(e.target, 59); });
+  $("sEvery").addEventListener("input", function (e) { var f = parseFloat(String(e.target.value).replace(",", ".")); cfg().signal.every = clamp(isFinite(f) ? Math.round(f * 2) / 2 : 0, 0, 99); save(); });
+  $("sEvery").addEventListener("change", function (e) { var n = clamp(toInt(e.target.value, 0), 0, 99); e.target.value = n || ""; });
+  $("sLabel").addEventListener("input", function (e) { cfg().signal.label = e.target.value.slice(0, 30); save(); });
+  $("pEvery").addEventListener("input", function (e) { cfg().palier.every = clamp(toInt(e.target.value, 0), 0, 99); save(); });
+  $("pEvery").addEventListener("change", function (e) { var n = clamp(toInt(e.target.value, 0), 0, 99); e.target.value = n || ""; });
+  $("pMsg").addEventListener("input", function (e) { cfg().palier.msg = e.target.value.slice(0, 60); save(); });
+
+  /* ---------- Écran Journal ---------- */
+  var MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+  var JOURS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+  function p2(n) { return (n < 10 ? "0" : "") + n; }
+  function dayKey(ts) { var d = new Date(ts); return d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate()); }
+  function dayLabel(ts) { var d = new Date(ts); return JOURS[d.getDay()] + " " + d.getDate() + " " + MOIS[d.getMonth()] + " " + d.getFullYear(); }
+  function hhmm(ts) { var d = new Date(ts); return p2(d.getHours()) + ":" + p2(d.getMinutes()); }
+  function whyLabel(w) {
+    return { score: "objectif de score", counter: "objectif du compteur", time: "temps écoulé", manual: "fin de manche (manuelle)", timenone: "temps écoulé, aucun gagnant", exo: "fin de l'exercice", reset: "remise à zéro", config: "changement de configuration" }[w] || w;
+  }
+  function winnerOf(e) {
+    if (e.winner === "a" || e.winner === "b") return e[e.winner].name;
+    return null;
+  }
+  function selectedDay() { var v = $("jDay").value; return v || "all"; }
+  function entriesForDay() {
+    var d = selectedDay();
+    return journal.filter(function (e) { return d === "all" || dayKey(e.ts) === d; });
+  }
+  function buildDays() {
+    var cur = $("jDay").value, seen = {}, days = [];
+    journal.slice().reverse().forEach(function (e) { var k = dayKey(e.ts); if (!seen[k]) { seen[k] = 1; days.push([k, dayLabel(e.ts)]); } });
+    var h = '<option value="all">Tous les jours</option>' + days.map(function (d) { return '<option value="' + d[0] + '">' + esc(d[1]) + '</option>'; }).join("");
+    $("jDay").innerHTML = h;
+    var want = cur && (cur === "all" || seen[cur]) ? cur : (days.length ? days[0][0] : "all");
+    $("jDay").value = want;
+  }
+  function renderJournal() {
+    buildDays();
+    var list = entriesForDay().slice().reverse();
+    $("jCount").textContent = "(" + journal.length + ")";
+    ["jShare", "jCopy", "jCsv", "jClear"].forEach(function (id) { $(id).disabled = !journal.length; });
+    $("jDay").disabled = !journal.length;
+    $("goJournal").textContent = "Journal des scores" + (journal.length ? " (" + journal.length + ")" : "");
+    if (!list.length) { $("jList").innerHTML = '<p class="jempty">Aucune manche enregistrée pour le moment. Une ligne apparaît à chaque fin de manche validée.</p>'; return; }
+    $("jList").innerHTML = list.map(function (e) {
+      var w = winnerOf(e);
+      var res = e.solo ? (e.done ? (e.winner ? "Manche réussie" : "Manche perdue") : "Partie interrompue") : (e.done ? (w ? "Gagnant : " + esc(w) : (e.why === "timenone" ? "Aucun gagnant" : "Égalité")) : "Partie interrompue");
+      var meta = [hhmm(e.ts) + (e.done ? " · manche " + e.rang : ""), esc(e.cfg), whyLabel(e.why)];
+      if (e.sec) meta.push(fmt(e.sec));
+      var l2 = [res];
+      if (e.cname) l2.push(esc(e.cname) + " : " + e.a.counter + " – " + e.b.counter);
+      if (e.a.manches || e.b.manches) l2.push("manches " + e.a.manches + " – " + e.b.manches);
+      if (e.variante) l2.push(esc(e.variante));
+      if (e.note) l2.push("note : " + esc(e.note));
+      return '<div class="jitem"><div class="jhead">' + meta.join(" · ") + '</div>' +
+        '<div class="jscore">' + (e.solo ? esc(e.a.name) + ' : ' + e.a.score + ' paniers' : esc(e.a.name) + ' ' + e.a.score + ' – ' + e.b.score + ' ' + esc(e.b.name)) + '</div>' +
+        '<div class="jmeta">' + l2.join(" · ") + '</div>' +
+        '<button type="button" id="jd-' + e.id + '" data-jdel="' + e.id + '" aria-label="Supprimer cette ligne">✕</button></div>';
+    }).join("");
+  }
+  function summaryText(list) {
+    if (!list.length) return "";
+    var out = [], lastDay = "", wins = {}, ties = 0, nones = 0;
+    function flush() {
+      if (!lastDay) return;
+      var parts = Object.keys(wins).map(function (k) { return k + " " + wins[k]; });
+      if (parts.length || ties || nones) out.push("Manches gagnées : " + (parts.join(", ") || "aucune") + (ties ? " · égalités : " + ties : "") + (nones ? " · sans gagnant : " + nones : ""));
+      out.push("");
+      wins = {}; ties = 0; nones = 0;
+    }
+    list.forEach(function (e) {
+      var k = dayKey(e.ts);
+      if (k !== lastDay) { flush(); out.push("COMPTEUR DE MATCH — " + dayLabel(e.ts)); lastDay = k; }
+      var w = winnerOf(e);
+      out.push((e.done ? "Manche " + e.rang : "Partie interrompue") + " · " + hhmm(e.ts) + " · " + e.cfg + (e.note ? " (" + e.note + ")" : ""));
+      var line = e.solo ? e.a.name + " : " + e.a.score + " paniers" : e.a.name + " " + e.a.score + " – " + e.b.score + " " + e.b.name;
+      if (e.solo) { if (e.done) line += e.winner ? " · manche réussie" : " · manche perdue"; }
+      else if (e.done) line += w ? " · gagnant : " + w : (e.why === "timenone" ? " · aucun gagnant" : " · égalité");
+      line += " · " + whyLabel(e.why);
+      if (e.sec) line += " · " + fmt(e.sec);
+      out.push(line);
+      if (e.variante) out.push("Variante : " + e.variante);
+      if (e.cname) out.push(e.cname + " : " + e.a.counter + " – " + e.b.counter);
+      if (e.done) { if (w) wins[w] = (wins[w] || 0) + 1; else if (e.why === "timenone") nones++; else ties++; }
+    });
+    flush();
+    return out.join("\n").replace(/\n+$/, "");
+  }
+  function csvText() {
+    var cols = ["date", "heure", "configuration", "contexte", "exercice", "cycle", "categorie", "ordre", "seance", "variante", "note", "manche", "terminee",
+      "fin", "equipe_1", "couleur_1", "score_1", "compteur_nom", "compteur_1", "manches_1", "equipe_2", "couleur_2", "score_2", "compteur_2", "manches_2",
+      "gagnant", "duree_s", "mode_temps"];
+    function q(v) { return '"' + String(v === undefined || v === null ? "" : v).replace(/"/g, '""') + '"'; }
+    var rows = [cols.map(q).join(";")];
+    journal.forEach(function (e) {
+      var d = new Date(e.ts), w = winnerOf(e);
+      rows.push([dayKey(e.ts), p2(d.getHours()) + ":" + p2(d.getMinutes()) + ":" + p2(d.getSeconds()), e.cfg, e.ctx, e.exercice, e.cycle, e.categorie, e.ordre, e.seance, e.variante, e.note,
+        e.done ? e.rang : "", e.done ? "oui" : "non", whyLabel(e.why),
+        e.a.name, e.a.color + 1, e.a.score, e.cname, e.a.counter, e.a.manches,
+        e.b.name, e.b.color + 1, e.b.score, e.b.counter, e.b.manches,
+        e.done ? (w || (e.why === "timenone" ? "aucun" : "égalité")) : "", e.sec, e.timer].map(q).join(";"));
+    });
+    return rows.join("\r\n");
+  }
+  function say(m) { $("jMsg").textContent = m; setTimeout(function () { if ($("jMsg").textContent === m) $("jMsg").textContent = ""; }, 4000); }
+  function copyText(txt, okMsg) {
+    function fallback() {
+      try {
+        var ta = document.createElement("textarea"); ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select(); var ok = document.execCommand("copy"); document.body.removeChild(ta);
+        say(ok ? okMsg : "Copie impossible sur ce navigateur.");
+      } catch (e) { say("Copie impossible sur ce navigateur."); }
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { say(okMsg); }, fallback);
+      else fallback();
+    } catch (e) { fallback(); }
+  }
+  function showJournal(on) {
+    $("play").hidden = on; $("journal").hidden = !on;
+    if (on) renderJournal(); else render();
+    window.scrollTo(0, 0);
+  }
+  $("goJournal").addEventListener("click", function () { showJournal(true); });
+  $("jBack").addEventListener("click", function () { showJournal(false); });
+  $("jDay").addEventListener("change", renderJournal);
+  $("jCopy").addEventListener("click", function () { copyText(summaryText(entriesForDay()), "Résumé copié."); });
+  $("jShare").addEventListener("click", function () {
+    var txt = summaryText(entriesForDay());
+    if (navigator.share) navigator.share({ text: txt }).catch(function () {});
+    else copyText(txt, "Partage indisponible ici : résumé copié.");
+  });
+  $("jCsv").addEventListener("click", function () {
+    try {
+      var b = new Blob(["\ufeff" + csvText()], { type: "text/csv;charset=utf-8" });
+      var u = URL.createObjectURL(b), a = document.createElement("a");
+      a.href = u; a.download = "journal-compteur-" + dayKey(new Date().toISOString()) + ".csv";
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(u); }, 1500);
+      say("Fichier CSV préparé.");
+    } catch (e) { say("Export impossible sur ce navigateur."); }
+  });
+  $("jClear").addEventListener("click", function () {
+    arm($("jClear"), "Tout vider", function () { journal = []; histJ = histJ.map(function () { return null; }); saveJournal(); renderJournal(); });
+  });
+  $("jList").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-jdel]"); if (!b) return;
+    var id = b.getAttribute("data-jdel");
+    arm(b, "✕", function () { journal = journal.filter(function (x) { return x.id !== id; }); saveJournal(); renderJournal(); });
+  });
+
+  /* ---------- Cycles et séances guidées ---------- */
+  function cut(x, n) { return String(x === undefined || x === null ? "" : x).slice(0, n); }
+  function isObj(x) { return !!x && typeof x === "object" && !Array.isArray(x); }
+  function safeId(x, fb) {
+    var s = cut(x || fb, 30);
+    return (s === "__proto__" || s === "constructor" || s === "prototype" || !s) ? fb : s;
+  }
+  function safePart(m) {
+    var o = {};
+    if (!isObj(m)) return o;
+    MODKEYS.forEach(function (k) {
+      if (Object.prototype.hasOwnProperty.call(m, k)) { var s = JSON.stringify(m[k]); if (s !== undefined) o[k] = JSON.parse(s); }
+    });
+    return o;
+  }
+  function mergePart(base, part) {
+    Object.keys(part).forEach(function (k) {
+      if (k === "__proto__" || k === "constructor" || k === "prototype") return;
+      var v = part[k], b = base[k];
+      if (isObj(v) && isObj(b)) mergePart(b, v); else base[k] = v;
+    });
+  }
+  function strList(a, max, len) {
+    return (Array.isArray(a) ? a : []).slice(0, max).map(function (x) { return cut(x, len); }).filter(Boolean);
+  }
+  function cleanRappel(r) {
+    r = isObj(r) ? r : {};
+    return { objectif: cut(r.objectif, 600), regles: strList(r.regles, 24, 300), dire: cut(r.dire, 300), robin: cut(r.robin, 600) };
+  }
+  function cleanRappelMod(r) {
+    r = isObj(r) ? r : {};
+    return { objectif: cut(r.objectif, 600), regles_plus: strList(r.regles_plus, 6, 300), dire: cut(r.dire, 300), robin: cut(r.robin, 600) };
+  }
+  function cleanOptions(list) {
+    var out = [];
+    (Array.isArray(list) ? list : []).slice(0, 8).forEach(function (o, i) {
+      if (!isObj(o)) return;
+      var vals = [];
+      (Array.isArray(o.valeurs) ? o.valeurs : []).slice(0, 8).forEach(function (v, j) {
+        if (!isObj(v)) return;
+        var m = isObj(v.modif) ? v.modif : {}, mod = safePart(m);
+        mod.rappel = cleanRappelMod(m.rappel);
+        vals.push({ id: safeId(v.id, "v" + j), titre: cut(v.titre || v.id || "Choix " + (j + 1), 60), modif: mod });
+      });
+      if (!vals.length) return;
+      var multi = o.choix === "multiple", ids = vals.map(function (v) { return v.id; });
+      var def = (Array.isArray(o.defaut) ? o.defaut : (o.defaut ? [o.defaut] : [])).map(String).filter(function (d) { return ids.indexOf(d) >= 0; });
+      if (!multi) def = def.length ? [def[0]] : [ids[0]];
+      out.push({ id: safeId(o.id, "o" + i), titre: cut(o.titre || "Option", 60), choix: multi ? "multiple" : "unique", defaut: def, valeurs: vals });
+    });
+    return out;
+  }
+  function cleanSchemas(list) {
+    var out = [];
+    (Array.isArray(list) ? list : []).slice(0, 6).forEach(function (x, i) {
+      if (!isObj(x) || typeof x.img !== "string") return;
+      if (x.img.length > 450000 || !/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(x.img)) return;
+      out.push({ titre: cut(x.titre || "Schéma " + (i + 1), 40), legende: cut(x.legende, 200), img: x.img });
+    });
+    return out;
+  }
+  function cleanBloc(b, i) {
+    if (!isObj(b)) throw new Error("Le bloc " + (i + 1) + " est mal formé.");
+    var type = ["minuteur", "opposition", "saisie"].indexOf(b.type) >= 0 ? b.type : "opposition";
+    return { id: safeId(b.id, "b" + (i + 1)), type: type, titre: cut(b.titre || "Exercice " + (i + 1), 60),
+      duree: clamp(toInt(b.duree, 600), 30, 21600), config: safePart(b.config), options: cleanOptions(b.options), rappel: cleanRappel(b.rappel), schemas: cleanSchemas(b.schemas) };
+  }
+  function cleanSeance(s, k) {
+    if (!isObj(s) || !Array.isArray(s.blocs) || !s.blocs.length) throw new Error("La séance " + ((k || 0) + 1) + " ne contient aucun bloc.");
+    var seen = {};
+    var blocs = s.blocs.slice(0, 30).map(function (b, i) {
+      var x = cleanBloc(b, i);
+      if (seen[x.id]) x.id = x.id.slice(0, 26) + "-" + i;
+      seen[x.id] = 1;
+      return x;
+    });
+    var dm = /^(\d{1,2})\s*[:hH]\s*(\d{2})$/.exec(String(s.debut || "").trim()), debut = "";
+    if (dm && +dm[1] < 24 && +dm[2] < 60) debut = (+dm[1] < 10 ? "0" : "") + (+dm[1]) + ":" + dm[2];
+    return { nom: cut(s.nom || "Séance " + ((k || 0) + 1), 60), blocs: blocs, debut: debut, jour: cut(s.jour, 30), date: cut(s.date, 30),
+      materiel: strList(s.materiel, 12, 80), alertes: strList(s.alertes, 6, 200), rappels: strList(s.rappels, 6, 200), match: cut(s.match, 300) };
+  }
+  function cleanCycle(raw) {
+    if (!isObj(raw)) throw new Error("Le fichier n'est pas un cycle.");
+    if (raw.format !== "compteur-cycle-1") throw new Error("Format non reconnu : ce n'est pas un fichier de cycle du compteur (format attendu « compteur-cycle-1 »).");
+    var c = isObj(raw.cycle) ? raw.cycle : {};
+    if (!Array.isArray(raw.seances) || !raw.seances.length) throw new Error("Le cycle ne contient aucune séance.");
+    return { id: cut(c.id || c.nom || "cycle", 60), nom: cut(c.nom || "Cycle sans nom", 80), theme: cut(c.theme, 200), categorie: cut(c.categorie, 40), groupe: cut(c.groupe, 60), total: clamp(toInt(c.total, 0), 0, 99),
+      seances: raw.seances.slice(0, 12).map(function (s, k) { return cleanSeance(s, k); }) };
+  }
+  function parseCycleText(txt) {
+    txt = String(txt || "").replace(/^﻿/, "");
+    var a = txt.indexOf("{"), z = txt.lastIndexOf("}");
+    if (a < 0 || z <= a) throw new Error("Aucun cycle trouvé dans ce texte.");
+    var raw;
+    try { raw = JSON.parse(txt.slice(a, z + 1)); }
+    catch (e) { throw new Error("Le texte n'est pas un fichier de cycle lisible (" + e.message + ")."); }
+    return cleanCycle(raw);
+  }
+  function fileShape(c) {
+    return { format: "compteur-cycle-1", cycle: { id: c.id, nom: c.nom, theme: c.theme, categorie: c.categorie, groupe: c.groupe, total: c.total || undefined }, seances: c.seances };
+  }
+  function loadCycles() {
+    var out = [];
+    try {
+      var a = JSON.parse(localStorage.getItem(CKEY));
+      if (Array.isArray(a)) a.forEach(function (x) { try { out.push(cleanCycle(x)); } catch (e) {} });
+    } catch (e) {}
+    return out;
+  }
+  function saveCycles() { try { localStorage.setItem(CKEY, JSON.stringify(cycles.map(fileShape))); } catch (e) {} }
+  function cyc(id) { for (var i = 0; i < cycles.length; i++) if (cycles[i].id === id) return cycles[i]; return null; }
+
+  function numArr(x, n) {
+    var o = [];
+    for (var i = 0; i < n; i++) o.push(Array.isArray(x) && typeof x[i] === "number" && isFinite(x[i]) ? x[i] : null);
+    return o;
+  }
+  function cleanGuided(x) {
+    if (!isObj(x) || !isObj(x.cfg) || !isObj(x.seance)) return null;
+    try {
+      var sn = cleanSeance(x.seance, 0), n = sn.blocs.length, cy = isObj(x.cycle) ? x.cycle : {};
+      var cc = clean({ configs: [x.cfg], activeId: x.cfg.id });
+      if (!cc) return null;
+      var choix = {}, durs = {}, regl = {}, saved = {};
+      sn.blocs.forEach(function (b) {
+        var m = isObj(x.choix) && isObj(x.choix[b.id]) ? x.choix[b.id] : {}, mm = {};
+        b.options.forEach(function (o) {
+          var a = m[o.id];
+          mm[o.id] = Array.isArray(a) ? a.map(String).filter(function (id) { return o.valeurs.some(function (v) { return v.id === id; }); }) : o.defaut.slice();
+        });
+        choix[b.id] = mm;
+        var d = isObj(x.durs) ? toInt(x.durs[b.id], 0) : 0;
+        if (d > 0) durs[b.id] = clamp(d, 30, 21600);
+        var r = isObj(x.regl) && isObj(x.regl[b.id]) ? x.regl[b.id] : null;
+        if (r) {
+          var ro = {};
+          if (r.score !== undefined && r.score !== null && r.score !== "") ro.score = clamp(toInt(r.score, 0), 0, 99);
+          if (r.min !== undefined && r.min !== null && r.min !== "") { var fm = parseFloat(r.min); if (isFinite(fm)) ro.min = clamp(Math.round(fm * 60) / 60, 0, 99); }
+          if (r.pause !== undefined && r.pause !== null && r.pause !== "") ro.pause = clamp(toInt(r.pause, 30), 5, 300);
+          if (r.chain === "oui" || r.chain === "non") ro.chain = r.chain;
+          if (r.n !== undefined && r.n !== null && r.n !== "") ro.n = clamp(toInt(r.n, 2), 2, MAXT);
+          if (r.seuil !== undefined && r.seuil !== null && r.seuil !== "") ro.seuil = clamp(toInt(r.seuil, 3), 1, 99);
+          if (MODES.indexOf(r.mode) >= 0) ro.mode = r.mode;
+          if (Object.keys(ro).length) regl[b.id] = ro;
+        }
+        var sv = isObj(x.saved) && isObj(x.saved[b.id]) ? x.saved[b.id] : null;
+        if (sv && isObj(sv.cfg)) {
+          var sc = clean({ configs: [sv.cfg], activeId: sv.cfg.id, game: sv.game, time: sv.time, exo: sv.exo });
+          if (sc) saved[b.id] = { cfg: sc.configs[0], game: sc.game, time: sc.time, exo: sc.exo, lg: cleanLg(sv.lg, sv.game) };
+        }
+      });
+      var notes = (Array.isArray(x.notes) ? x.notes : []).slice(0, 30).filter(isObj).map(function (nn) { return { ts: typeof nn.ts === "number" ? nn.ts : Date.now(), ex: cut(nn.ex, 80), txt: cut(nn.txt, 600) }; }).filter(function (nn) { return nn.txt; });
+      return { notes: notes, cycle: { id: cut(cy.id, 60), nom: cut(cy.nom, 80), theme: cut(cy.theme, 200), categorie: cut(cy.categorie, 40), groupe: cut(cy.groupe, 60), rang: clamp(toInt(cy.rang, 0), 0, 99), total: clamp(toInt(cy.total, 0), 0, 99) },
+        seance: sn, choix: choix, durs: durs, regl: regl, saved: saved, cur: clamp(toInt(x.cur, 0), 0, n - 1), t0: typeof x.t0 === "number" ? x.t0 : Date.now(),
+        starts: numArr(x.starts, n), ends: numArr(x.ends, n), finished: !!x.finished, cfg: cc.configs[0],
+        p0: typeof x.p0 === "number" ? x.p0 : undefined, endBz: !!x.endBz };
+    } catch (e) { return null; }
+  }
+
+  /* choix de variantes : { idBloc: { idOption: [idValeur…] } } */
+  function defChoix(sn) {
+    var out = {};
+    sn.blocs.forEach(function (b) {
+      var m = {};
+      b.options.forEach(function (o) { m[o.id] = o.defaut.slice(); });
+      out[b.id] = m;
+    });
+    return out;
+  }
+  function selIds(src, b, o) {
+    var m = src.choix && src.choix[b.id], a = m && m[o.id];
+    return Array.isArray(a) ? a : o.defaut;
+  }
+  function dureeOf(src, b) { var d = src.durs && src.durs[b.id]; return d ? clamp(d, 30, 21600) : b.duree; }
+  function chosenVals(src, b) {
+    var out = [];
+    b.options.forEach(function (o) {
+      var ids = selIds(src, b, o);
+      o.valeurs.forEach(function (v) { if (ids.indexOf(v.id) >= 0) out.push({ o: o, v: v }); });
+    });
+    return out;
+  }
+  function deriveCfg(gd, i, noRegl) {
+    var b = gd.seance.blocs[i], raw = blank(b.titre), extras = [], gainsX = [];
+    raw.id = "g-" + b.id;
+    function take(m) {
+      if (Array.isArray(m.boutons_plus)) m.boutons_plus.forEach(function (x) { extras.push(x); });
+      delete m.boutons_plus;
+      if (Array.isArray(m.gains_plus)) m.gains_plus.forEach(function (x) { gainsX.push(x); });
+      delete m.gains_plus;
+      return m;
+    }
+    mergePart(raw, take(JSON.parse(JSON.stringify(b.config))));
+    chosenVals(gd, b).forEach(function (x) {
+      var m = {};
+      Object.keys(x.v.modif).forEach(function (k) { if (k !== "rappel") m[k] = x.v.modif[k]; });
+      mergePart(raw, take(JSON.parse(JSON.stringify(m))));
+    });
+    if (extras.length) raw.buttons = (Array.isArray(raw.buttons) ? raw.buttons : []).concat(extras);
+    if (gainsX.length) { if (!isObj(raw.palier)) raw.palier = cleanPalier(); raw.palier.gains = (Array.isArray(raw.palier.gains) ? raw.palier.gains : []).concat(gainsX); }
+    var r = !noRegl && gd.regl && gd.regl[b.id];
+    if (r) {
+      if (r.score !== undefined) raw.goals.score = r.score;
+      if (r.min !== undefined) {
+        if (r.min > 0) { raw.timer.mode = "timer"; raw.timer.duration = Math.round(r.min * 60); } else raw.timer.mode = "none";
+      }
+      if (!isObj(raw.equipes)) raw.equipes = {};
+      if (!isObj(raw.enchainement)) raw.enchainement = {};
+      if (r.chain === "oui") raw.enchainement.actif = true;
+      if (r.chain === "non") raw.enchainement.actif = false;
+      if (r.pause !== undefined) raw.enchainement.pause = r.pause;
+      if (r.seuil !== undefined) { if (!isObj(raw.palier)) raw.palier = cleanPalier(); raw.palier.every = r.seuil; }
+      if (r.n !== undefined) raw.equipes.n = r.n;
+      if (r.mode) raw.equipes.mode = r.mode;
+    }
+    raw.name = b.titre;
+    raw.exo = { duration: dureeOf(gd, b) };
+    if (b.type !== "opposition") { raw.noscore = true; raw.timer.mode = "none"; }
+    else if (raw.timer.mode === "timer" && raw.timer.duration >= raw.exo.duration && !(isObj(raw.enchainement) && raw.enchainement.actif)) raw.timer.mode = "none";
+    return clean({ configs: [raw], activeId: raw.id }).configs[0];
+  }
+  function deriveRappel(gd, i) {
+    var b = gd.seance.blocs[i], r = b.rappel;
+    var out = { objectif: r.objectif, regles: r.regles.slice(), dire: r.dire, robin: r.robin };
+    chosenVals(gd, b).forEach(function (x) {
+      var m = x.v.modif.rappel;
+      if (!m) return;
+      if (m.objectif) out.objectif = m.objectif;
+      if (m.dire) out.dire = m.dire;
+      if (m.robin) out.robin = m.robin;
+      m.regles_plus.forEach(function (t) { out.regles.push(t); });
+    });
+    return out;
+  }
+  function variantLabel(gd, i) {
+    var b = gd.seance.blocs[i];
+    var parts = [];
+    b.options.forEach(function (o) {
+      var ids = selIds(gd, b, o), t = [];
+      o.valeurs.forEach(function (v) { if (ids.indexOf(v.id) >= 0) t.push(v.titre); });
+      if (t.length) parts.push(o.titre + " : " + t.join(", "));
+    });
+    var r = gd.regl && gd.regl[b.id];
+    if (r) {
+      if (r.score !== undefined) parts.push("Objectif réglé : " + (r.score ? r.score + " pts" : "aucun"));
+      if (r.min !== undefined) parts.push("Timer de manche réglé : " + (r.min ? minTxt(r.min * 60) + " min" : "aucun"));
+      if (r.chain) parts.push("Enchaînement : " + (r.chain === "oui" ? "oui" : "non"));
+      if (r.pause !== undefined) parts.push("Mise en place : " + r.pause + " s");
+      if (r.seuil !== undefined) parts.push("Seuil réglé : " + r.seuil);
+      if (r.n !== undefined) parts.push("Équipes réglées : " + r.n);
+      if (r.mode) parts.push("Rotation réglée : " + MODEL[r.mode]);
+    }
+    return parts.join(" ; ");
+  }
+  function ecartTxt(gd) {
+    var i = gd.cur, plan = 0, k;
+    for (k = 0; k < i; k++) plan += dureeOf(gd, gd.seance.blocs[k]);
+    var st = gd.starts[i] || Date.now();
+    var o0 = gd.p0 || gd.t0;
+    var d = Math.round(((st - o0) / 1000 - plan) / 60);
+    var d2 = Math.round(((Date.now() - o0) / 1000 - (plan + dureeOf(gd, gd.seance.blocs[i]))) / 60);
+    d = Math.max(d, d2);
+    return d > 0 ? "Retard : +" + d + " min" : (d < 0 ? "Avance : " + (-d) + " min" : "À l'heure");
+  }
+
+  /* ---------- Écrans ---------- */
+  function showOnly(name) {
+    ["play", "settings", "journal", "prep", "seance", "pre"].forEach(function (n) { $(n).hidden = n !== name; });
+    window.scrollTo(0, 0);
+  }
+  function backToPlay() { showOnly("play"); render(); }
+
+  /* préparation */
+  function prepInit() {
+    var c = cyc(prep.cycleId) || cycles[0];
+    if (!c) { prep.cycleId = ""; prep.seance = 0; prep.choix = {}; prep.durs = {}; prep.regl = {}; return; }
+    prep.cycleId = c.id;
+    if (prep.seance < 0 || prep.seance >= c.seances.length) prep.seance = 0;
+    prep.choix = defChoix(c.seances[prep.seance]);
+    prep.durs = {};
+    prep.regl = {};
+  }
+  function prepSrc() {
+    var c = cyc(prep.cycleId);
+    return { seance: c.seances[prep.seance], choix: prep.choix, durs: prep.durs, regl: prep.regl };
+  }
+  function reglHTML(src, b) {
+    if (b.type !== "opposition") return "";
+    var r = (src.regl && src.regl[b.id]) || {}, id = esc(b.id);
+    return '<div class="sub two"><label>Objectif de points<input class="field" type="number" inputmode="numeric" min="0" max="99" data-rb="' + id + '" data-rk="score" value="' + (r.score !== undefined ? r.score : "") + '"></label>' +
+      '<label>Timer de manche (min, ex. 4:30)<input class="field" type="text" inputmode="text" autocomplete="off" data-rb="' + id + '" data-rk="min" value="' + (r.min !== undefined ? minTxt(r.min * 60) : "") + '"></label></div>' +
+      '<div class="sub two"><label>Nombre d\'équipes<input class="field" type="number" inputmode="numeric" min="2" max="6" data-rb="' + id + '" data-rk="n" value="' + (r.n !== undefined ? r.n : "") + '"></label>' +
+      '<label>Rotation<select class="field" data-rb="' + id + '" data-rk="mode"><option value="">Selon la variante</option>' +
+      MODES.map(function (m) { return '<option value="' + m + '"' + (r.mode === m ? " selected" : "") + '>' + esc(MODEL[m]) + '</option>'; }).join("") + '</select></label></div>' +
+      '<div class="sub two"><label>Enchaînement automatique<select class="field" data-rb="' + id + '" data-rk="chain"><option value="">Selon la variante</option>' +
+      '<option value="oui"' + (r.chain === "oui" ? " selected" : "") + '>Oui</option><option value="non"' + (r.chain === "non" ? " selected" : "") + '>Non</option></select></label>' +
+      '<label>Mise en place (s)<input class="field" type="number" inputmode="numeric" min="5" max="300" data-rb="' + id + '" data-rk="pause" value="' + (r.pause !== undefined ? r.pause : "") + '"></label></div>' +
+      '<p class="note">Pour choisir toi-même le nombre de points, de minutes (4:30 = 4 min 30) ou d\'équipes. Laisse vide pour garder la variante choisie ; 0 = aucun (points et minutes).</p>';
+  }
+  function readRegl(el, src) {
+    var bid = el.getAttribute("data-rb"), k = el.getAttribute("data-rk");
+    if (!bid || !k) return;
+    if (!src.regl) src.regl = {};
+    if (!src.regl[bid]) src.regl[bid] = {};
+    if (k === "mode") { if (MODES.indexOf(el.value) < 0) delete src.regl[bid][k]; else src.regl[bid][k] = el.value; }
+    else if (k === "chain") { if (el.value === "oui" || el.value === "non") src.regl[bid][k] = el.value; else delete src.regl[bid][k]; }
+    else if (el.value === "") delete src.regl[bid][k];
+    else if (k === "n") src.regl[bid][k] = clamp(toInt(el.value, 2), 2, MAXT);
+    else if (k === "pause") src.regl[bid][k] = clamp(toInt(el.value, 30), 5, 300);
+    else if (k === "min") { var fv = parseMin(el.value); if (fv === null || isNaN(fv)) delete src.regl[bid][k]; else src.regl[bid][k] = clamp(fv, 0, 99); }
+    else src.regl[bid][k] = clamp(toInt(el.value, 0), 0, 99);
+    if (!Object.keys(src.regl[bid]).length) delete src.regl[bid];
+  }
+  function setReglPh(root, src, i) {
+    var b = src.seance.blocs[i];
+    if (b.type !== "opposition") return;
+    var d = deriveCfg(src, i, true);
+    [].slice.call(root.querySelectorAll("input[data-rb]")).forEach(function (el) {
+      if (el.getAttribute("data-rb") !== b.id) return;
+      var rk = el.getAttribute("data-rk");
+      el.placeholder = rk === "score" ? (d.goals.score ? String(d.goals.score) : "aucun") : rk === "n" ? String(d.equipes.n) : rk === "pause" ? String(d.enchainement.pause) : (d.timer.mode === "timer" ? minTxt(d.timer.duration) : "aucun");
+    });
+  }
+  function optHTML(src, b, o) {
+    var ids = selIds(src, b, o), at = ' data-b="' + esc(b.id) + '" data-o="' + esc(o.id) + '"';
+    if (o.choix === "unique") {
+      return '<label class="olab">' + esc(o.titre) + '<select' + at + '>' + o.valeurs.map(function (v) {
+        return '<option value="' + esc(v.id) + '"' + (ids.indexOf(v.id) >= 0 ? " selected" : "") + '>' + esc(v.titre) + '</option>';
+      }).join("") + '</select></label>';
+    }
+    return '<div class="olab">' + esc(o.titre) + o.valeurs.map(function (v) {
+      return '<label class="chk"><input type="checkbox"' + at + ' value="' + esc(v.id) + '"' + (ids.indexOf(v.id) >= 0 ? " checked" : "") + '> ' + esc(v.titre) + '</label>';
+    }).join("") + '</div>';
+  }
+  function readOpt(el, src) {
+    var bid = el.getAttribute("data-b"), oid = el.getAttribute("data-o");
+    if (!bid || !oid) return;
+    if (!src.choix[bid]) src.choix[bid] = {};
+    if (el.type === "checkbox") {
+      var grp = el.closest(".olab"), ids = [];
+      [].slice.call(grp.querySelectorAll("input")).forEach(function (i) { if (i.checked) ids.push(i.value); });
+      src.choix[bid][oid] = ids;
+    } else src.choix[bid][oid] = [el.value];
+  }
+  function prepTotal() {
+    var c = cyc(prep.cycleId), t = 0;
+    if (c) c.seances[prep.seance].blocs.forEach(function (b) { t += dureeOf(prep, b); });
+    return t;
+  }
+  function hm(sec) {
+    var m = Math.round(sec / 60);
+    return m >= 60 ? Math.floor(m / 60) + " h " + p2(m % 60) : m + " min";
+  }
+  function prepInfo() {
+    var c = cyc(prep.cycleId);
+    if (!c) { $("pInfo").textContent = "Aucun cycle importé pour le moment : colle le texte du fichier de cycle, ou choisis le fichier, plus bas."; return; }
+    var sn = c.seances[prep.seance], bits = [];
+    if (c.theme) bits.push(c.theme);
+    if (c.categorie) bits.push(c.categorie);
+    if (c.groupe) bits.push(c.groupe);
+    bits.push(sn.blocs.length + " exercices · durée prévue " + hm(prepTotal()));
+    $("pInfo").textContent = bits.join(" · ");
+  }
+  function renderPrep() {
+    var c = cyc(prep.cycleId);
+    $("pCycle").innerHTML = cycles.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === prep.cycleId ? " selected" : "") + '>' + esc(x.nom) + '</option>'; }).join("");
+    $("pSeance").innerHTML = c ? c.seances.map(function (s, i) { return '<option value="' + i + '"' + (i === prep.seance ? " selected" : "") + '>' + esc(s.nom) + '</option>'; }).join("") : "";
+    $("pCycle").disabled = !c; $("pSeance").disabled = !c; $("pBase").disabled = !c; $("pGo").disabled = !c;
+    $("pBlocksCard").hidden = !c;
+    if (c) {
+      $("pBlocks").innerHTML = c.seances[prep.seance].blocs.map(function (b, i) {
+        return '<details class="blk"' + (b.options.length ? ' open' : '') + '><summary><span class="bt">' + (i + 1) + '. ' + esc(b.titre) + '<small id="bv-' + i + '"></small></span><span class="bm" id="bm-' + i + '">' + Math.round(dureeOf(prep, b) / 60) + ' min</span></summary>' +
+          '<div class="blkbody"><label class="olab">Durée (minutes)<input class="field" type="number" inputmode="numeric" min="1" max="360" data-dur="' + esc(b.id) + '" value="' + Math.round(dureeOf(prep, b) / 60) + '"></label>' +
+          b.options.map(function (o) { return optHTML(prep, b, o); }).join("") + reglHTML(prep, b) + '</div></details>';
+      }).join("");
+    } else $("pBlocks").innerHTML = "";
+    if (c) refreshPrep(); else prepInfo();
+    $("cList").innerHTML = cycles.map(function (x, i) {
+      return '<div class="crow"><span>' + esc(x.nom) + ' · ' + x.seances.length + ' séance(s)</span><button type="button" id="cdel-' + i + '" data-cdel="' + i + '">Supprimer</button></div>';
+    }).join("");
+  }
+  function showPrep() {
+    if (!cyc(prep.cycleId)) { prep.seance = 0; prepInit(); }
+    $("pNote").textContent = "";
+    renderPrep(); showOnly("prep");
+  }
+  function refreshPrep() {
+    var c = cyc(prep.cycleId); if (!c) return;
+    var src = prepSrc();
+    c.seances[prep.seance].blocs.forEach(function (b, i) {
+      var e = $("bm-" + i); if (e) e.textContent = Math.round(dureeOf(prep, b) / 60) + " min";
+      var v = $("bv-" + i); if (v) v.textContent = variantLabel(src, i);
+      setReglPh($("pBlocks"), src, i);
+    });
+    prepInfo();
+  }
+  function doImport(txt) {
+    try {
+      var c = parseCycleText(txt), at = -1;
+      cycles.forEach(function (x, k) { if (x.id === c.id) at = k; });
+      if (at >= 0) cycles[at] = c;
+      else {
+        if (cycles.length >= 20) throw new Error("Trop de cycles enregistrés (20 au maximum) : supprime-en un d'abord.");
+        cycles.push(c);
+      }
+      saveCycles();
+      prep.cycleId = c.id; prep.seance = 0; prepInit();
+      var nb = 0; c.seances.forEach(function (s) { nb += s.blocs.length; });
+      $("cMsg").textContent = "Cycle « " + c.nom + " » " + (at >= 0 ? "mis à jour" : "importé") + " : " + c.seances.length + " séance(s), " + nb + " exercices.";
+      $("cImport").value = "";
+      renderPrep();
+    } catch (e) { $("cMsg").textContent = e.message; }
+  }
+
+  /* séance en cours */
+  function snapBlock() {
+    var gd = state.guided; if (!gd) return;
+    pauseTime(); pauseExo();
+    gd.saved[gd.seance.blocs[gd.cur].id] = JSON.parse(JSON.stringify({ cfg: gd.cfg, game: state.game, time: state.time, exo: state.exo, lg: state.lg }));
+  }
+  function gotoBlock(i) {
+    var gd = state.guided, b = gd.seance.blocs[i], sv = gd.saved[b.id];
+    gd.cur = i; gd.finished = false;
+    gd.starts[i] = Date.now(); gd.ends[i] = null;
+    if (sv) {
+      var c = JSON.parse(JSON.stringify(sv));
+      gd.cfg = c.cfg; state.game = c.game; state.time = c.time; state.exo = c.exo; clearHist();
+      var l0 = cleanLg(c.lg, c.game);
+      state.lg.pair = l0.pair; state.lg.step = l0.step; state.lg.q = l0.q; state.lg.w = l0.w; lgEnsure();
+    } else { gd.cfg = deriveCfg(gd, i); switchReset(); state.time.off = false; }
+    sigUntil = 0; rappelKey = ""; rappelOpen = true; $("vov").hidden = true;
+    if (!sv && state.exo.duration > 0) { if (chainOn()) startAll(); else startExo(); }
+    save(); buildTeams(); buzz();
+  }
+  function p0Of(sn) {
+    var m = sn && /^(\d{2}):(\d{2})$/.exec(sn.debut || ""); if (!m) return 0;
+    var d = new Date(); d.setHours(+m[1], +m[2], 0, 0); return d.getTime();
+  }
+  function hhmm(ts) { var d = new Date(ts); return p2(d.getHours()) + ":" + p2(d.getMinutes()); }
+  function whistle() {
+    ensureAudio(); if (!actx) return;
+    try {
+      var now = actx.currentTime;
+      [0, 0.55].forEach(function (d) {
+        var o = actx.createOscillator(), l = actx.createOscillator(), lg = actx.createGain(), g = actx.createGain();
+        o.type = "sine"; o.frequency.value = 2700; l.frequency.value = 32; lg.gain.value = 180;
+        l.connect(lg); lg.connect(o.frequency);
+        g.gain.setValueAtTime(0.0001, now + d); g.gain.exponentialRampToValueAtTime(0.85, now + d + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, now + d + 0.42);
+        o.connect(g); g.connect(actx.destination);
+        o.start(now + d); l.start(now + d); o.stop(now + d + 0.45); l.stop(now + d + 0.45);
+      });
+    } catch (e) {}
+    try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
+  }
+  function endBuzzer() {
+    ensureAudio(); if (!actx) return;
+    try {
+      var now = actx.currentTime, o = actx.createOscillator(), g = actx.createGain();
+      o.type = "sawtooth"; o.frequency.value = 196;
+      g.gain.setValueAtTime(0.0001, now); g.gain.exponentialRampToValueAtTime(0.95, now + 0.05); g.gain.setValueAtTime(0.95, now + 1.8); g.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
+      o.connect(g); g.connect(actx.destination); o.start(now); o.stop(now + 2.45);
+      var o2 = actx.createOscillator(), g2 = actx.createGain();
+      o2.type = "square"; o2.frequency.value = 392; g2.gain.setValueAtTime(0.0001, now); g2.gain.exponentialRampToValueAtTime(0.5, now + 0.05); g2.gain.setValueAtTime(0.5, now + 1.8); g2.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
+      o2.connect(g2); g2.connect(actx.destination); o2.start(now); o2.stop(now + 2.45);
+    } catch (e) {}
+    try { if (navigator.vibrate) navigator.vibrate([600, 150, 600, 150, 900]); } catch (e) {}
+  }
+  function prepSeance() { var c = cyc(prep.cycleId); return c && c.seances[prep.seance] ? c.seances[prep.seance] : null; }
+  function planTotal(src, sn) { var t = 0; sn.blocs.forEach(function (b) { t += dureeOf(src, b); }); return t; }
+  function renderPre() {
+    var sn = prepSeance(); if (!sn) return;
+    var c = cyc(prep.cycleId);
+    $("preTitle").textContent = sn.nom + (sn.date ? " · " + sn.date : "") + " · séance " + (prep.seance + 1) + " sur " + (c.total || c.seances.length);
+    $("preSub").textContent = c.nom;
+    var fill = function (box, list, items) { $(box).hidden = !items.length; $(list).innerHTML = items.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join(""); };
+    fill("preAl", "preAlL", sn.alertes || []);
+    fill("preRap", "preRapL", sn.rappels || []);
+    var mt = { take: [], site: [], oth: [] };
+    (sn.materiel || []).forEach(function (t) { var m = /^(À prendre|Sur place)\s*:\s*([\s\S]+)$/.exec(t); if (m) (m[1] === "Sur place" ? mt.site : mt.take).push(m[2]); else mt.oth.push(t); });
+    var ul = function (a) { return "<ul>" + a.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>"; };
+    $("preMat").hidden = !(mt.take.length || mt.site.length || mt.oth.length);
+    $("preMatL").innerHTML = (mt.take.length ? '<p style="margin:4px 0"><b>À prendre</b></p>' + ul(mt.take) : "") + (mt.site.length ? '<p style="margin:8px 0 4px"><b>Déjà sur place</b></p>' + ul(mt.site) : "") + (mt.oth.length ? ul(mt.oth) : "");
+    $("preMatch").hidden = !sn.match; $("preMatchT").textContent = sn.match || "";
+    var ac = null; sn.blocs.forEach(function (b) { if (!ac && (b.id === "accueil" || /accueil/i.test(b.titre))) ac = b; });
+    $("preAcc").hidden = !ac;
+    if (ac) {
+      var ah = "";
+      if (ac.rappel.objectif) ah += '<p class="robj">' + esc(ac.rappel.objectif) + '</p>';
+      if (ac.rappel.regles.length) ah += '<ul>' + ac.rappel.regles.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join("") + '</ul>';
+      if (ac.rappel.dire) ah += '<p class="rdire"><b>Cri collectif</b>' + esc(ac.rappel.dire) + '</p>';
+      $("preAccB").innerHTML = ah;
+    }
+    var p0 = p0Of(sn) || Date.now(), acc = 0;
+    $("preList").innerHTML = sn.blocs.map(function (b, i) {
+      var h = '<div class="srow todo" style="opacity:1"><span class="sn">' + (i + 1) + '</span><span class="st">' + esc(b.titre) + '<small>' + (sn.debut ? hhmm(p0 + acc * 1000) + " · " : "") + Math.round(dureeOf(prep, b) / 60) + ' min</small></span><span></span></div>';
+      acc += dureeOf(prep, b); return h;
+    }).join("");
+    renderPreClock();
+  }
+  function renderPreClock() {
+    var sn = prepSeance(); if (!sn || $("pre").hidden) return;
+    var p0 = p0Of(sn), now = Date.now(), end = (p0 || now) + planTotal(prep, sn) * 1000, t;
+    if (p0 && p0 > now) { var s = Math.ceil((p0 - now) / 1000); t = "Début dans " + Math.floor(s / 60) + ":" + p2(s % 60); }
+    else if (p0) t = "Début prévu à " + sn.debut + " · il est " + hhmm(now);
+    else t = "Il est " + hhmm(now);
+    $("preClock").textContent = t + " · fin prévue " + hhmm(end);
+  }
+  function showPre() { if (!prepSeance()) return; ensureAudio(); showOnly("pre"); renderPre(); }
+  function startGuided() {
+    wlRequest();
+    var c = cyc(prep.cycleId); if (!c) return;
+    var sn = c.seances[prep.seance]; if (!sn) return;
+    recordIfPlay("config", cfg());
+    state.guided = { cycle: { id: c.id, nom: c.nom, theme: c.theme, categorie: c.categorie, groupe: c.groupe, rang: prep.seance + 1, total: c.total || c.seances.length }, notes: [],
+      seance: JSON.parse(JSON.stringify(sn)), choix: JSON.parse(JSON.stringify(prep.choix)), durs: JSON.parse(JSON.stringify(prep.durs)), regl: JSON.parse(JSON.stringify(prep.regl)), saved: {},
+      cur: 0, t0: Date.now(), starts: numArr([], sn.blocs.length), ends: numArr([], sn.blocs.length), finished: false, cfg: null };
+    state.guided.p0 = p0Of(sn) || state.guided.t0; state.guided.endBz = false;
+    gotoBlock(0);
+    whistle();
+    backToPlay();
+  }
+  function finishBlock() {
+    var gd = state.guided; if (!gd || gd.finished) return;
+    recordIfPlay("exo", cfg());
+    snapBlock();
+    gd.ends[gd.cur] = Date.now();
+    if (gd.cur >= gd.seance.blocs.length - 1) {
+      gd.finished = true; save(); render(); showSeance(); buzz();
+    } else gotoBlock(gd.cur + 1);
+  }
+  function jumpTo(i) {
+    var gd = state.guided; if (!gd || i < 0 || (i === gd.cur && !gd.finished)) return;
+    if (!gd.finished) { recordIfPlay("exo", cfg()); snapBlock(); gd.ends[gd.cur] = Date.now(); }
+    gotoBlock(i); backToPlay();
+  }
+  function applyOptions() {
+    var gd = state.guided; if (!gd || gd.finished) return;
+    var played = elapsedMs() > 0 || !!state.time.startedAt;
+    gd.cfg = deriveCfg(gd, gd.cur);
+    lgEnsure();
+    if (!played) state.time.duration = gd.cfg.timer.duration;
+    state.exo.sig = sigFired(gd.cfg, state.exo.duration, exoMs());
+    rappelKey = ""; save(); buildTeams(); backToPlay();
+  }
+  function quitGuided() {
+    var gd = state.guided; if (!gd) return;
+    if (!gd.finished) recordIfPlay("exo", cfg());
+    state.guided = null; rappelKey = "";
+    switchReset(); save(); buildTeams(); backToPlay();
+  }
+
+  function planStart(gd, i) {
+    var acc = 0, k; for (k = 0; k < i; k++) acc += dureeOf(gd, gd.seance.blocs[k]);
+    return (gd.p0 || gd.t0) + acc * 1000;
+  }
+  function seanceLabel(gd) {
+    var cy = gd.cycle, s = gd.seance;
+    return s.nom + (s.date ? " · " + s.date : "") + (cy.total ? " · séance " + cy.rang + " sur " + cy.total : "");
+  }
+  function renderGuidedLive() {
+    var gd = state.guided; if (!gd) return;
+    var n = gd.seance.blocs.length, head, num, sub, now = Date.now(), ck;
+    if (gd.finished) { head = "Séance terminée"; num = n + " sur " + n; sub = n + " exercices"; ck = "Il est " + hhmm(now) + " · séance terminée"; }
+    else {
+      var b = gd.seance.blocs[gd.cur], st = gd.starts[gd.cur] || now, ps = planStart(gd, gd.cur), pe = ps + dureeOf(gd, b) * 1000;
+      head = hhmm(ps) + " · " + b.titre; num = (gd.cur + 1) + " sur " + n;
+      sub = Math.max(0, Math.floor((now - st) / 60000)) + " / " + Math.round(dureeOf(gd, b) / 60) + " min";
+      ck = "Il est " + hhmm(now) + " · fin de l'exercice prévue " + hhmm(pe) + " · " + ecartTxt(gd);
+    }
+    var o0 = gd.p0 || gd.t0, tot = 0; gd.seance.blocs.forEach(function (x) { tot += dureeOf(gd, x); });
+    var endAt = o0 + tot * 1000;
+    if ($("gClock").textContent !== ck) $("gClock").textContent = ck;
+    if (!gd.finished && !gd.endBz && now >= endAt) { gd.endBz = true; save(); endBuzzer(); }
+    if ($("gTitle").textContent !== head) $("gTitle").textContent = head;
+    if ($("gN").textContent !== num) $("gN").textContent = num;
+    if ($("gSub").textContent !== sub) $("gSub").textContent = sub;
+    var full = seanceLabel(gd) + " · " + (gd.finished ? "terminée" : "exercice " + (gd.cur + 1) + "/" + n + " · " + ecartTxt(gd));
+    if ($("sSub").textContent !== full) $("sSub").textContent = full;
+  }
+  /* rubriques de la fiche : les lignes du fichier commencent par leur rubrique (« Organisation : … ») */
+  var SEC = [
+    { k: "lien", t: "Lien avec l'entraînement", cls: "", pre: ["lien"] },
+    { k: "org", t: "Organisation et déroulement", cls: "s-org", merged: true, pre: ["organisation", "placement", "deroulement", "fin de l'action", "fin d'action", "principe", "format"] },
+    { k: "cpt", t: "Comptage et manches", cls: "s-cpt", merged: true, pre: ["comptage", "manche", "regle", "faute", "bonus", "victoire", "condition de victoire", "tableau de suivi", "suivi"] },
+    { k: "rot", t: "Rotation et changements", cls: "s-rot", merged: true, pre: ["rotation", "changement", "signal"] },
+    { k: "exig", t: "Exigences techniques", cls: "s-tech", pre: ["exigences techniques", "exigence technique", "exigences"] },
+    { k: "tech", t: "Consignes techniques", cls: "s-tech", pre: ["consignes techniques", "consigne technique", "technique"] },
+    { k: "orient", t: "Comment orienter le jeu pour avoir le choix attendu", cls: "s-orient", pre: ["comment orienter", "orienter le jeu"] },
+    { k: "def", t: "Consignes défensives", cls: "s-def", pre: ["consignes defensives", "consigne defensive", "defense"] },
+    { k: "evo", t: "Évolutions", cls: "", pre: ["evolution"] },
+    { k: "crit", t: "Critères de réussite", cls: "", pre: ["criteres de reussite", "critere de reussite", "reussite"] },
+    { k: "err", t: "Erreurs fréquentes", cls: "", pre: ["erreurs"] },
+    { k: "mat", t: "Matériel", cls: "", pre: ["materiel"] },
+    { k: "autre", t: "Autres consignes", cls: "", pre: [] }
+  ];
+  function normPre(s) { return String(s).toLowerCase().replace(/[éèêë]/g, "e").replace(/[àâä]/g, "a").replace(/[îï]/g, "i").replace(/[ôö]/g, "o").replace(/[ùûü]/g, "u").replace(/ç/g, "c").replace(/[’]/g, "'").trim(); }
+  function secOf(pre) {
+    var n = normPre(pre), i, j;
+    for (i = 0; i < SEC.length; i++) for (j = 0; j < SEC[i].pre.length; j++) if (n.indexOf(SEC[i].pre[j]) === 0) return SEC[i];
+    return null;
+  }
+  function splitRoles(txt) {
+    return String(txt).split(/\s+(?=(?:Meneur|Ailier|Défenseur|Défenseurs|Passeur|Rebondeur|Attaquant|Attaquants|Joueurs? sans ballon|Tous|Pivot)\s*:)/);
+  }
+  function ficheHTML(gd, i) {
+    var b = gd.seance.blocs[i], r = deriveRappel(gd, i), by = {}, h = "", isAcc = b.id === "accueil";
+    r.regles.forEach(function (t) {
+      var m = /^([^:]{2,60}?)\s*:\s*([\s\S]+)$/.exec(t), sec = m ? secOf(m[1]) : null, pre = "", body = t;
+      if (sec) { pre = m[1]; body = m[2]; } else sec = SEC[SEC.length - 1];
+      if (!by[sec.k]) by[sec.k] = { def: sec, items: [] };
+      by[sec.k].items.push({ pre: pre, body: body });
+    });
+    var vl = variantLabel(gd, i);
+    if (vl) h += '<p class="rvar"><b>Réglages choisis pour cet exercice</b>' + esc(vl.split(" ; ").join(" · ")) + '</p>';
+    if (isAcc) {
+      h += '<details class="acc s-obj" open><summary>Ce que je dis</summary><div class="accb">';
+      if (r.objectif) h += '<p class="robj">' + esc(r.objectif) + '</p>';
+      h += '<ul>' + r.regles.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join("") + '</ul>';
+      h += '<p><b>Déroulé</b></p><ul>' + gd.seance.blocs.map(function (x, k) { return '<li>' + hhmm(planStart(gd, k)) + ' · ' + esc(x.titre) + ' · ' + Math.round(dureeOf(gd, x) / 60) + ' min</li>'; }).join("") + '</ul>';
+      if (r.dire) h += '<p class="rdire"><b>Cri collectif</b>' + esc(r.dire) + '</p>';
+      h += '</div></details>';
+    } else if (r.objectif || r.dire) {
+      h += '<details class="acc s-obj"><summary>Objectif</summary><div class="accb">';
+      if (r.objectif) h += splitRoles(r.objectif).map(function (t) { return '<p class="robj">' + esc(t) + '</p>'; }).join("");
+      if (r.dire) h += '<p class="rdire"><b>À dire au lancement</b>' + esc(r.dire) + '</p>';
+      h += '</div></details>';
+    }
+    SEC.forEach(function (s) {
+      var x = by[s.k]; if (!x || isAcc) return;
+      h += '<details class="acc ' + s.cls + '"' + (s.k === "org" ? " open" : "") + '><summary>' + esc(s.t) + '</summary><div class="accb"><ul>' + x.items.map(function (it) {
+        var lab = s.merged && it.pre ? '<b>' + esc(it.pre) + '</b>' : "";
+        return '<li>' + lab + esc(it.body) + '</li>';
+      }).join("") + '</ul></div></details>';
+    });
+    if (r.robin) {
+      var rm = /^\s*(Pour [^:]{1,30}?)\s*:\s*([\s\S]*)$/.exec(r.robin), rl = rm ? rm[1] : "Pour le coach", rt = rm ? rm[2] : r.robin;
+      if (rt) h += '<details class="acc"><summary>' + esc(rl) + '</summary><div class="accb"><p>' + esc(rt) + '</p></div></details>';
+    }
+    if (b.type === "saisie") h += '<p class="note">Pas de comptage dans l\'appli pour cet exercice : le suivi par joueur viendra plus tard.</p>';
+    if (!h) h = '<p class="note">Pas de rappel pour cet exercice.</p>';
+    return h;
+  }
+  function renderRappel() {
+    var gd = state.guided, box = $("rappel");
+    if (!gd || gd.finished) { box.hidden = true; return; }
+    var key = gd.cur + "|" + variantLabel(gd, gd.cur);
+    if (key !== rappelKey) {
+      rappelKey = key;
+      box.innerHTML = ficheHTML(gd, gd.cur);
+    }
+    box.hidden = !rappelOpen;
+  }
+  /* fenêtre « Variantes » en cours d'exercice */
+  function renderVar() {
+    var gd = state.guided;
+    if (!gd || gd.finished) { $("vov").hidden = true; return; }
+    var b = gd.seance.blocs[gd.cur];
+    $("gVar").hidden = !b.options.length;
+    if ($("vov").hidden) return;
+    $("vTitle").textContent = "Variantes · " + b.titre;
+    $("vOpts").innerHTML = b.options.map(function (o) { return optHTML(gd, b, o); }).join("");
+  }
+  $("gVar").addEventListener("click", function () { $("vov").hidden = false; renderVar(); window.scrollTo(0, 0); });
+  $("vClose").addEventListener("click", function () { $("vov").hidden = true; });
+  $("vApply").addEventListener("click", function () { applyOptions(); $("vov").hidden = true; });
+  $("vOpts").addEventListener("change", function (e) { if (state.guided && e.target.hasAttribute("data-o")) { readOpt(e.target, state.guided); save(); } });
+  var schIdx = 0;
+  function curSchemas() {
+    var gd = state.guided;
+    if (!gd || gd.finished) return [];
+    var b = gd.seance.blocs[gd.cur];
+    return (b && b.schemas) || [];
+  }
+  function updateSchemaBtn() {
+    var n = curSchemas().length;
+    $("gSchema").hidden = !n;
+    if (!n) $("schov").hidden = true;
+    var gd = state.guided;
+    $("gRes").hidden = !(gd && (gd.finished || gd.cur >= gd.seance.blocs.length - 1));
+  }
+  function showSchema(i) {
+    var L = curSchemas();
+    if (!L.length) { $("schov").hidden = true; return; }
+    schIdx = Math.max(0, Math.min(L.length - 1, i));
+    $("schTitle").textContent = (state.guided.seance.blocs[state.guided.cur].titre || "Schéma");
+    $("schImg").src = L[schIdx].img;
+    $("schLeg").hidden = !L[schIdx].legende; $("schLeg").textContent = L[schIdx].legende || "";
+    $("schTabs").innerHTML = L.length > 1 ? L.map(function (x, k) { return '<button type="button" data-k="' + k + '"' + (k === schIdx ? ' class="on"' : '') + '>' + esc(x.titre) + '</button>'; }).join("") : "";
+    $("schov").hidden = false;
+    window.scrollTo(0, 0);
+  }
+  function renderGuided() {
+    var gd = state.guided, on = !!gd;
+    $("gbar").hidden = !on;
+    $("cfgPlay").hidden = on;
+    $("topbar").classList.toggle("guided", on);
+    $("gPrev").disabled = !on || (gd.cur === 0 && !gd.finished);
+    $("goSeance").textContent = on ? (gd.finished ? "Séance terminée" : "Séance en cours") : "Séance guidée";
+    var ns = !!cfg().noscore;
+    $("teams").hidden = ns; $("barBtns").hidden = ns; $("resetBar").hidden = ns;
+    if (!$("reset").classList.contains("arm")) $("reset").textContent = resetLabel();
+    $("note").hidden = on; $("nbox").hidden = !on;
+    if (!on) { $("vov").hidden = true; $("gVar").hidden = true; $("rappel").hidden = true; $("regle").hidden = true; $("ctl").hidden = true; $("ctlPanel").hidden = true; $("oNext").hidden = false; return; }
+    renderGuidedLive();
+    renderRegle();
+    renderCtl();
+    renderVar();
+    renderRappel();
+    updateSchemaBtn();
+    if (!$("gNext").classList.contains("arm")) {
+      $("gNext").textContent = gd.finished ? "Bilan" : (gd.cur >= gd.seance.blocs.length - 1 ? "Terminer la séance ▶" : "Terminer ▶");
+    }
+    var o = state.game.over, hide = !!(o && o.why === "exo" && o.final);
+    $("oNext").hidden = hide;
+    if (hide && o.locked) $("ohint").textContent = "Pour corriger un score, touche un bouton deux fois. Touche « Terminer » pour passer à la suite.";
+  }
+  function renderSeance() {
+    var gd = state.guided; if (!gd) return;
+    var n = gd.seance.blocs.length, b = gd.seance.blocs[gd.cur];
+    $("sTitle").textContent = gd.cycle.nom;
+    $("sBlocks").innerHTML = gd.seance.blocs.map(function (x, i) {
+      var cur = i === gd.cur && !gd.finished, cls = " todo", pl = Math.round(dureeOf(gd, x) / 60), acc = 0, k, st;
+      for (k = 0; k < i; k++) acc += dureeOf(gd, gd.seance.blocs[k]);
+      var at = gd.seance.debut ? hhmm((gd.p0 || gd.t0) + acc * 1000) + " · " : "";
+      st = at + "à venir · " + pl + " min prévues";
+      if (cur) { cls = " cur"; st = at + "en cours · " + pl + " min prévues"; }
+      else if (gd.ends[i] && gd.starts[i]) { cls = " done"; st = "✓ prévu " + pl + " / fait " + Math.max(1, Math.round((gd.ends[i] - gd.starts[i]) / 60000)) + " min"; }
+      return '<div class="srow' + cls + '"><span class="sn">' + (i + 1) + '</span><span class="st">' + esc(x.titre) + '<small>' + st + '</small></span>' +
+        (cur ? '<span></span>' : '<button type="button" id="sg-' + i + '" data-go="' + i + '">Aller</button>') + '</div>';
+    }).join("");
+    $("sOptCard").hidden = gd.finished || !(b.options.length || b.type === "opposition");
+    $("sOpts").innerHTML = gd.finished ? "" : b.options.map(function (o) { return optHTML(gd, b, o); }).join("") + reglHTML(gd, b);
+    if (!gd.finished) setReglPh($("sOpts"), gd, gd.cur);
+    $("sDone").hidden = !gd.finished;
+    renderBilan(gd);
+    if (gd.finished) {
+      var last = 0; gd.ends.forEach(function (e) { if (e && e > last) last = e; });
+      var plan = 0; gd.seance.blocs.forEach(function (x) { plan += dureeOf(gd, x); });
+      $("sDoneTxt").textContent = "Durée réelle : " + hm(Math.max(0, (last || Date.now()) - gd.t0) / 1000) + " pour " + hm(plan) + " prévues. Les résultats de chaque exercice sont dans le journal des scores.";
+    }
+    $("sQuit").textContent = gd.finished ? "Fermer la séance" : "Quitter la séance";
+    renderGuidedLive();
+  }
+  function showSeance() { renderSeance(); showOnly("seance"); }
+
+  $("goSeance").addEventListener("click", function () { if (state.guided) showSeance(); else showPrep(); });
+  $("pBack").addEventListener("click", backToPlay);
+  $("sBack").addEventListener("click", backToPlay);
+  $("pCycle").addEventListener("change", function (e) { prep.cycleId = e.target.value; prep.seance = 0; prepInit(); $("pNote").textContent = ""; renderPrep(); });
+  $("pSeance").addEventListener("change", function (e) { prep.seance = toInt(e.target.value, 0); prepInit(); $("pNote").textContent = ""; renderPrep(); });
+  $("pBase").addEventListener("click", function () { prepInit(); renderPrep(); $("pNote").textContent = "Réglages de base rechargés pour tous les exercices."; });
+  $("pGo").addEventListener("click", showPre);
+  $("preGo").addEventListener("click", startGuided);
+  $("preBack").addEventListener("click", function () { showOnly("prep"); });
+  $("pBlocks").addEventListener("change", function (e) { if (e.target.hasAttribute("data-o")) { readOpt(e.target, prep); refreshPrep(); } });
+  $("pBlocks").addEventListener("input", function (e) {
+    if (e.target.hasAttribute("data-rb")) { readRegl(e.target, prep); refreshPrep(); return; }
+    var id = e.target.getAttribute("data-dur"); if (!id) return;
+    var n = toInt(e.target.value, 0);
+    if (n >= 1) { prep.durs[id] = clamp(n, 1, 360) * 60; refreshPrep(); }
+  });
+  $("cDo").addEventListener("click", function () { doImport($("cImport").value); });
+  $("cFile").addEventListener("change", function (e) {
+    var inp = e.target, f = inp.files && inp.files[0]; if (!f) return;
+    if (f.size > 500000) { $("cMsg").textContent = "Ce fichier est trop gros pour être un cycle."; return; }
+    var rd = new FileReader();
+    rd.onload = function () { doImport(String(rd.result || "")); inp.value = ""; };
+    rd.onerror = function () { $("cMsg").textContent = "Lecture du fichier impossible."; };
+    rd.readAsText(f);
+  });
+  $("cList").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-cdel]"); if (!b) return;
+    var i = parseInt(b.getAttribute("data-cdel"), 10);
+    arm(b, "Supprimer", function () {
+      var gone = cycles.splice(i, 1)[0];
+      saveCycles();
+      if (gone && gone.id === prep.cycleId) { prep.cycleId = ""; prep.seance = 0; prepInit(); }
+      renderPrep();
+    });
+  });
+  $("gPrev").addEventListener("click", function () {
+    var gd = state.guided; if (!gd) return;
+    jumpTo(gd.finished ? gd.cur : gd.cur - 1);
+  });
+  $("endRound").addEventListener("click", function () {
+    var g = state.game; if (g.over) return;
+    snap();
+    g.over = { winner: liveWinner(), why: "manual", locked: true, final: false };
+    pauseTime(); alertEnd(); if (chainOn()) startPause(); save(); render();
+  });
+  $("gFiche").addEventListener("click", function () { rappelOpen = !rappelOpen; renderRappel(); });
+  $("gSchema").addEventListener("click", function () { showSchema(0); });
+  $("schClose").addEventListener("click", function () { $("schov").hidden = true; });
+  $("schTabs").addEventListener("click", function (e) { var k = e.target && e.target.getAttribute && e.target.getAttribute("data-k"); if (k !== null && k !== undefined) showSchema(parseInt(k, 10)); });
+  $("gSeance").addEventListener("click", showSeance);
+  $("gNext").addEventListener("click", function () {
+    var gd = state.guided; if (!gd) return;
+    if (gd.finished) { showSeance(); return; }
+    var last = gd.cur >= gd.seance.blocs.length - 1;
+    var quick = exoEnded() || (!state.game.over && !hasPlay() && exoMs() === 0);
+    if (quick) finishBlock(); else arm($("gNext"), last ? "Terminer la séance ▶" : "Terminer ▶", finishBlock);
+  });
+  $("sBilanBody").addEventListener("click", function (e) {
+    var b = e.target.closest("#sCopy"); if (!b || !state.guided) return;
+    var txt = bilanText(state.guided, bilanData(state.guided));
+    function done(m) { $("sCopyMsg").textContent = m; }
+    function fallback() {
+      try { var ta = document.createElement("textarea"); ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select(); var ok = document.execCommand("copy"); document.body.removeChild(ta); done(ok ? "Bilan copié." : "Copie impossible sur ce navigateur."); } catch (er) { done("Copie impossible sur ce navigateur."); }
+    }
+    try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { done("Bilan copié."); }, fallback); else fallback(); } catch (er) { fallback(); }
+  });
+  $("sBlocks").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-go]"); if (!b) return;
+    var i = parseInt(b.getAttribute("data-go"), 10);
+    jumpTo(i);
+  });
+  $("sOpts").addEventListener("change", function (e) { if (state.guided && e.target.hasAttribute("data-o")) { readOpt(e.target, state.guided); save(); setReglPh($("sOpts"), state.guided, state.guided.cur); } });
+  $("sOpts").addEventListener("input", function (e) { if (state.guided && e.target.hasAttribute("data-rb")) { readRegl(e.target, state.guided); save(); } });
+  $("sApply").addEventListener("click", applyOptions);
+  $("nOk").addEventListener("click", function () {
+    var gd = state.guided, t = $("nText").value.trim(); if (!gd || !t) { $("nMsg").textContent = "Écris d'abord ta note."; return; }
+    gd.notes = gd.notes || [];
+    if (gd.notes.length >= 30) gd.notes.shift();
+    gd.notes.push({ ts: Date.now(), ex: gd.finished ? "" : gd.seance.blocs[gd.cur].titre, txt: t.slice(0, 600) });
+    $("nText").value = ""; $("nMsg").textContent = "Note validée à " + hhmm(Date.now()) + ". Elle apparaît dans le bilan de la séance."; save();
+  });
+  $("gRes").addEventListener("click", function () { showSeance(); var el = $("sBilan"); if (el && !el.hidden) el.scrollIntoView(); });
+  $("sQuit").addEventListener("click", function () {
+    var gd = state.guided; if (!gd) return;
+    if (gd.finished) quitGuided(); else arm($("sQuit"), "Quitter la séance", quitGuided);
+  });
+
+  /* ---------- Bloc 7 : équipes multiples ---------- */
+  function lgN(c) { return c && c.equipes && c.equipes.n > 2 ? c.equipes.n : 2; }
+  function lgOn() { return lgN(cfg()) > 2; }
+  function roundsMode(c) { return c.rounds.mode === "none" && lgN(c) > 2 ? "free" : c.rounds.mode; }
+  function slotTeam(t) { return lgOn() ? state.lg.pair[t === "a" ? 0 : 1] : (t === "a" ? 0 : 1); }
+  function tmOf(c, t) {
+    if (lgN(c) > 2) return state.lg.teams[state.lg.pair[t === "a" ? 0 : 1]];
+    return c.teams[t];
+  }
+  function tmRead(idx) {
+    var c = cfg();
+    if (idx < 2 && lgN(c) <= 2) return c.teams[idx ? "b" : "a"];
+    return state.lg.teams[idx];
+  }
+  function tmSet(idx, key, val) {
+    var c = cfg();
+    state.lg.teams[idx][key] = val;
+    if (idx < 2 && lgN(c) <= 2) c.teams[idx ? "b" : "a"][key] = val;
+  }
+  function tmName(idx) { return state.lg.teams[idx].name; }
+  function chip(k) {
+    var t = state.lg.teams[k];
+    return '<i class="dot" style="background: var(--p' + t.color + ')"></i>' + esc(t.name);
+  }
+
+  /* ordre des rencontres (modes à ordre fixe) */
+  function lgOrder(n, mode) {
+    var o = [], i, j;
+    if (n < 3) return o;
+    if (mode === "tournoi") {
+      var t = [], rounds = [], m, r;
+      for (i = 0; i < n; i++) t.push(i);
+      if (n % 2) t.push(-1);
+      m = t.length;
+      for (r = 0; r < m - 1; r++) {
+        var round = [];
+        for (i = 0; i < m / 2; i++) { var x = t[i], y = t[m - 1 - i]; if (x >= 0 && y >= 0) round.push([Math.min(x, y), Math.max(x, y)]); }
+        rounds.push(round);
+        t.splice(1, 0, t.pop());
+      }
+      var at = 0;
+      rounds.forEach(function (rd, k) { rd.forEach(function (p) { if (p[0] === 0 && p[1] === 1) at = k; }); });
+      for (j = 0; j < rounds.length; j++) rounds[(at + j) % rounds.length].forEach(function (p) { o.push(p); });
+      return o;
+    }
+    if (mode === "paires" && n % 2 === 0) { for (i = 0; i < n; i += 2) o.push([i, i + 1]); return o; }
+    if (mode === "paires") { for (i = 0; i < n; i++) o.push([(2 * i) % n, (2 * i + 1) % n]); return o; }
+    if (mode === "tourniquet") { for (i = 0; i < n; i++) o.push([i, (i + 1) % n]); return o; }
+    return o;
+  }
+  function pairIdx(o, p) {
+    for (var i = 0; i < o.length; i++) if ((o[i][0] === p[0] && o[i][1] === p[1]) || (o[i][0] === p[1] && o[i][1] === p[0])) return i;
+    return -1;
+  }
+  function lgFixQ() {
+    var lg = state.lg, n = lgN(cfg()), seen = {}, q = [], i;
+    lg.q.forEach(function (x) { if (x < n && lg.pair.indexOf(x) < 0 && !seen[x]) { seen[x] = 1; q.push(x); } });
+    for (i = 0; i < n; i++) if (lg.pair.indexOf(i) < 0 && !seen[i]) q.push(i);
+    lg.q = q;
+  }
+  function lgSync() {
+    var g = state.game, lg = state.lg;
+    g.manches.a = lg.w[lg.pair[0]]; g.manches.b = lg.w[lg.pair[1]];
+  }
+  function lgEnsure() {
+    var lg = state.lg, c = cfg(), n = lgN(c), p = lg.pair;
+    if (n <= 2 || p[0] >= n || p[1] >= n || p[0] === p[1]) { lg.pair = [0, 1]; if (n > 2) { var o0 = lgOrder(n, c.equipes.mode); if (o0.length) lg.pair = o0[0].slice(); } lg.step = 0; }
+    var o = lgOrder(n, c.equipes.mode);
+    if (o.length) { var k = pairIdx(o, lg.pair); lg.step = k >= 0 ? k : clamp(lg.step, 0, o.length - 1); } else lg.step = 0;
+    lgFixQ(); lgSync();
+  }
+  function lgInit() {
+    var lg = state.lg, i;
+    lg.w = []; for (i = 0; i < MAXT; i++) lg.w.push(0);
+    lg.pair = [0, 1]; lg.step = 0; lg.q = [];
+    lgEnsure();
+  }
+  /* rencontre suivante (sans rien modifier) ; w = côté gagnant "a" / "b" ou null */
+  function lgCalc(w) {
+    var lg = state.lg, c = cfg(), n = lgN(c), mode = c.equipes.mode;
+    var p = lg.pair.slice(), step = lg.step, q = lg.q.slice(), i;
+    if (n <= 2 || mode === "manuel") return { pair: p, step: step, q: q };
+    if (mode === "gagnant") {
+      var keep = w === "b" ? 1 : 0, out = 1 - keep, loser = p[out], np = p.slice();
+      var ch = q.length ? q.shift() : loser;
+      np[out] = ch; q.push(loser);
+      return { pair: np, step: step, q: q };
+    }
+    var o = lgOrder(n, mode);
+    if (!o.length) return { pair: p, step: step, q: q };
+    step = (step + 1) % o.length;
+    var nx = o[step].slice(); q = [];
+    for (i = 0; i < n; i++) if (nx.indexOf(i) < 0) q.push(i);
+    return { pair: nx, step: step, q: q };
+  }
+  function lgAdvance(w) {
+    var r = lgCalc(w), lg = state.lg;
+    lg.pair = r.pair; lg.step = r.step; lg.q = r.q; lgSync();
+  }
+  function overWinner(o) { return overW(o); }
+  function renderOlg(o) {
+    var el = $("olg");
+    if (!o || o.final || o.why === "exo" || !lgOn()) { el.hidden = true; return; }
+    var r = lgCalc(overWinner(o));
+    el.textContent = "Ensuite : " + tmName(r.pair[0]) + " contre " + tmName(r.pair[1]);
+    el.hidden = false;
+  }
+
+  /* bilan des manches gagnées */
+  function lgWinsOf(gd, i) {
+    var b = gd.seance.blocs[i];
+    if (i === gd.cur && !gd.finished) return state.lg.w;
+    var s = gd.saved[b.id];
+    return s && s.lg ? s.lg.w : null;
+  }
+  function lgBlockN(gd, i) {
+    var cf = (i === gd.cur && !gd.finished) ? gd.cfg : (gd.saved[gd.seance.blocs[i].id] && gd.saved[gd.seance.blocs[i].id].cfg);
+    return cf ? lgN(cf) : 2;
+  }
+  function lgTotals() {
+    var gd = state.guided, t = [], k;
+    for (k = 0; k < MAXT; k++) t.push(0);
+    if (!gd) return t;
+    gd.seance.blocs.forEach(function (b, i) {
+      var w = lgWinsOf(gd, i);
+      if (w) for (k = 0; k < MAXT; k++) t[k] += w[k];
+    });
+    return t;
+  }
+  function byWins(w, n) {
+    var idx = [], k;
+    for (k = 0; k < n; k++) idx.push(k);
+    idx.sort(function (x, y) { return w[y] - w[x] || x - y; });
+    return idx;
+  }
+  function cleanTitle(t) { return String(t).replace(/^\s*\d{1,2}\s*[h:]\s*\d{2}\s*[·\-–]\s*/i, ""); }
+  function chipC(name, color) { return '<i class="dot" style="background: var(--p' + clamp(toInt(color, 0), 0, NCOL - 1) + ')"></i>' + esc(name); }
+  function bilanData(gd) {
+    var rows = gd.seance.blocs.map(function (b, i) {
+      var cur = i === gd.cur && !gd.finished, sv = gd.saved[b.id];
+      var game = cur ? state.game : (sv && sv.game), cf = cur ? gd.cfg : (sv && sv.cfg);
+      var es = journal.filter(function (e) { return e.ctx === "Séance guidée" && e.cycle === gd.cycle.nom && e.seance === gd.seance.nom && e.exercice === b.titre && Date.parse(e.ts) >= gd.t0 - 1000; });
+      var plan = Math.round(dureeOf(gd, b) / 60), real = null;
+      if (gd.starts[i]) { var en = gd.ends[i] || (cur ? Date.now() : null); if (en) real = Math.max(1, Math.round((en - gd.starts[i]) / 60000)); }
+      var solo = !!(cf && cf.solo), done = es.filter(function (e) { return e.done; }), wins = {}, cols = {}, order = [], ok = 0, ko = 0;
+      done.forEach(function (e) {
+        if (solo) { if (e.winner) ok++; else ko++; return; }
+        if (e.winner) { var nm = e[e.winner].name; if (!(nm in wins)) { wins[nm] = 0; order.push(nm); cols[nm] = e[e.winner].color; } wins[nm]++; }
+      });
+      var last = es.length ? es[es.length - 1] : null, winner = null, res = "", resText = "";
+      var top = 0; order.forEach(function (nm) { if (wins[nm] > top) { top = wins[nm]; winner = nm; } });
+      var tie = order.filter(function (nm) { return wins[nm] === top; }).length > 1; if (tie) winner = null;
+      if (solo) {
+        res = "Manches réussies " + ok + " · perdues " + ko; resText = res.toLowerCase(); winner = null;
+        if (!done.length && last) { res = "Paniers : " + last.a.score; resText = res; }
+      } else if (order.length) {
+        order.sort(function (x, y) { return wins[y] - wins[x]; });
+        res = order.map(function (nm) { return chipC(nm, cols[nm]) + " " + wins[nm]; }).join(" · ");
+        resText = order.map(function (nm) { return nm + " " + wins[nm]; }).join(", ");
+      } else if (last) {
+        var a = last.a, bb = last.b;
+        res = chipC(a.name, a.color) + " " + a.score + " – " + bb.score + " " + chipC(bb.name, bb.color); resText = a.name + " " + a.score + " – " + bb.score + " " + bb.name;
+        if (a.score > bb.score) { winner = a.name; cols[a.name] = a.color; } else if (bb.score > a.score) { winner = bb.name; cols[bb.name] = bb.color; }
+      }
+      var st = {};
+      if (game && game.st) ["a", "b"].forEach(function (t) { Object.keys(game.st[t] || {}).forEach(function (k) { st[k] = (st[k] || 0) + game.st[t][k]; }); });
+      var stats = Object.keys(st).map(function (k) { return k + " ×" + st[k]; });
+      return { i: i, titre: cleanTitle(b.titre), plan: plan, real: real, cur: cur, res: res, resText: resText, winner: winner, wcol: winner ? cols[winner] : 0, solo: solo, rounds: done, last: last, stats: stats, hasRes: !!(res), wins: wins };
+    });
+    return rows;
+  }
+  function timeText(r) {
+    if (r.real === null) return "";
+    var d = r.real - r.plan;
+    return "prévu " + r.plan + " min, fait " + r.real + " min" + (d > 1 ? " (+" + d + ")" : (d < -1 ? " (" + d + ")" : " (respecté)"));
+  }
+  function bilanTotals(rows) {
+    var ex = {}, ma = {}, col = {}, names = [];
+    rows.forEach(function (r) {
+      if (r.solo) return;
+      Object.keys(r.wins).forEach(function (nm) { if (!(nm in ma)) { ma[nm] = 0; ex[nm] = 0; names.push(nm); } ma[nm] += r.wins[nm]; });
+      if (r.winner) { if (!(r.winner in ex)) { ex[r.winner] = 0; ma[r.winner] = ma[r.winner] || 0; names.push(r.winner); } ex[r.winner]++; col[r.winner] = r.wcol; }
+    });
+    var uniq = []; names.forEach(function (n) { if (uniq.indexOf(n) < 0) uniq.push(n); });
+    uniq.sort(function (x, y) { return (ex[y] - ex[x]) || (ma[y] - ma[x]); });
+    var win = null;
+    if (uniq.length) { var f = uniq[0], s = uniq[1]; if (!s || ex[f] > ex[s] || (ex[f] === ex[s] && ma[f] > ma[s])) win = f; }
+    return { names: uniq, ex: ex, ma: ma, win: win };
+  }
+  function bilanText(gd, rows) {
+    var T = bilanTotals(rows), out = [gd.cycle.nom, seanceLabel(gd)];
+    if (T.names.length) out.push("Séance : " + (T.win ? T.win + " gagne" : "égalité") + " (exercices gagnés : " + T.names.map(function (n) { return n + " " + T.ex[n]; }).join(", ") + " ; manches : " + T.names.map(function (n) { return n + " " + T.ma[n]; }).join(", ") + ")");
+    rows.forEach(function (r) {
+      var l = (r.i + 1) + ". " + r.titre;
+      if (r.resText) l += " · " + r.resText + (r.winner ? " (gagnant : " + r.winner + ")" : "");
+      var tt = timeText(r); if (tt) l += " · " + tt;
+      out.push(l);
+      if (r.stats.length) out.push("   " + r.stats.join(", "));
+    });
+    (gd.notes || []).forEach(function (nn) { out.push("Note " + hhmm(nn.ts) + (nn.ex ? " (" + cleanTitle(nn.ex) + ")" : "") + " : " + nn.txt); });
+    return out.join("\n");
+  }
+  function renderBilan(gd) {
+    var rows = bilanData(gd), any = rows.some(function (r) { return r.hasRes || r.real !== null; }) || (gd.notes && gd.notes.length);
+    $("sBilan").hidden = !(any || gd.finished);
+    if ($("sBilan").hidden) return;
+    var T = bilanTotals(rows), h = '<div class="bsay">';
+    if (T.names.length) {
+      h += '<p class="big">' + (T.win ? esc(T.win) + " gagne la séance" : "Séance : égalité") + '</p>';
+      h += '<p>Exercices gagnés : ' + T.names.map(function (n) { return esc(n) + " " + T.ex[n]; }).join(" · ") + '</p>';
+      h += '<p>Manches gagnées : ' + T.names.map(function (n) { return esc(n) + " " + T.ma[n]; }).join(" · ") + '</p>';
+    }
+    rows.forEach(function (r) {
+      if (!r.hasRes && r.real === null) return;
+      h += '<p>' + (r.i + 1) + '. ' + esc(r.titre) + (r.resText ? ' : ' + esc(r.resText) : '') + (r.winner ? " ★ " + esc(r.winner) : "") + (timeText(r) ? " · " + timeText(r) : "") + '</p>';
+    });
+    h += '</div>';
+    rows.forEach(function (r) {
+      if (!r.hasRes && r.real === null && !r.stats.length) return;
+      h += '<details class="acc"><summary>' + (r.i + 1) + '. ' + esc(r.titre) + (r.winner ? ' ★' : '') + '</summary><div class="accb">';
+      if (r.res) h += '<p>' + r.res + (r.winner ? ' · gagnant : ' + esc(r.winner) : '') + '</p>';
+      var tt = timeText(r); if (tt) h += '<p>Temps : ' + esc(tt) + '</p>';
+      r.rounds.forEach(function (e) {
+        h += '<p>Manche ' + e.rang + ' : ' + (r.solo ? e.a.score + ' paniers · ' + (e.winner ? 'réussie' : 'perdue') : esc(e.a.name) + ' ' + e.a.score + ' – ' + e.b.score + ' ' + esc(e.b.name)) + (e.sec ? ' · ' + fmt(e.sec) : '') + '</p>';
+      });
+      if (!r.rounds.length && r.last) h += '<p>' + (r.solo ? r.last.a.score + ' paniers' : esc(r.last.a.name) + ' ' + r.last.a.score + ' – ' + r.last.b.score + ' ' + esc(r.last.b.name)) + (r.last.sec ? ' · ' + fmt(r.last.sec) : '') + '</p>';
+      if (r.stats.length) h += '<p>Détail : ' + esc(r.stats.join(" · ")) + '</p>';
+      h += '</div></details>';
+    });
+    if (gd.notes && gd.notes.length) {
+      h += '<h2>Notes de séance</h2>' + gd.notes.map(function (nn) { return '<div class="bnote"><small>' + hhmm(nn.ts) + (nn.ex ? ' · ' + esc(cleanTitle(nn.ex)) : '') + '</small>' + esc(nn.txt) + '</div>'; }).join("");
+    }
+    h += '<button id="sCopy" type="button">Copier le bilan</button><p class="note" id="sCopyMsg"></p>';
+    $("sBilanBody").innerHTML = h;
+  }
+  function renderBilanOld(gd) {
+    var tot = lgTotals(), maxN = 2, sum = 0, i;
+    gd.seance.blocs.forEach(function (b, j) { maxN = Math.max(maxN, lgBlockN(gd, j)); });
+    tot.forEach(function (v) { sum += v; });
+    $("sBilan").hidden = !sum;
+    if (!sum) return;
+    var h = '<p class="bil"><b>Total de la séance</b> ' + byWins(tot, maxN).filter(function (k) { return tot[k] > 0; }).map(function (k) { return chip(k) + " " + tot[k]; }).join(" · ") + '</p>';
+    gd.seance.blocs.forEach(function (b, j) {
+      var w = lgWinsOf(gd, j); if (!w) return;
+      var n = lgBlockN(gd, j), s = 0;
+      for (i = 0; i < n; i++) s += w[i];
+      if (!s) return;
+      h += '<p class="bil"><b>' + (j + 1) + '. ' + esc(b.titre) + '</b> ' + byWins(w, n).filter(function (k) { return w[k] > 0; }).map(function (k) { return chip(k) + " " + w[k]; }).join(" · ") + '</p>';
+    });
+    $("sBilanBody").innerHTML = h;
+  }
+
+  /* écran de jeu : file d'attente, manches, total de séance */
+  var lgPanelOpen = false;
+  function renderLg() {
+    var c = cfg(), on = lgOn() && !c.noscore, lg = state.lg, n = lgN(c), k, h;
+    $("lgBar").hidden = !on;
+    if (!on) { $("lgPanel").hidden = true; return; }
+    $("lgWait").innerHTML = '<b>En attente</b> ' + lg.q.map(chip).join(", ");
+    h = [];
+    for (k = 0; k < n; k++) h.push(chip(k) + " " + lg.w[k]);
+    $("lgTally").innerHTML = '<b>Manches</b> ' + h.join(" · ");
+    var gd = state.guided, tot = gd ? lgTotals() : null, sum = 0;
+    if (tot) tot.forEach(function (v) { sum += v; });
+    $("lgTot").hidden = !(gd && sum);
+    if (gd && sum) {
+      var idx = byWins(tot, n);
+      $("lgTot").innerHTML = '<b>Séance</b> ' + idx.map(function (j) { return chip(j) + " " + tot[j]; }).join(" · ");
+    }
+    $("lgPanel").hidden = !lgPanelOpen;
+    if (lgPanelOpen) renderLgPanel();
+  }
+  function teamOptions(n, sel) {
+    var h = "", k;
+    for (k = 0; k < n; k++) h += '<option value="' + k + '"' + (k === sel ? " selected" : "") + '>' + esc(tmName(k)) + '</option>';
+    return h;
+  }
+  function renderLgPanel() {
+    var c = cfg(), lg = state.lg, n = lgN(c);
+    if (!lgOn()) return;
+    $("lgA").innerHTML = teamOptions(n, lg.pair[0]);
+    $("lgB").innerHTML = teamOptions(n, lg.pair[1]);
+    $("lgN").value = String(n);
+    $("lgMode").value = c.equipes.mode;
+  }
+  function lgSetN(n) {
+    var c = cfg(), old = lgN(c);
+    n = clamp(n, 2, MAXT);
+    if (old <= 2 && n > 2 && !state.guided) {
+      ["a", "b"].forEach(function (t, i) { state.lg.teams[i].name = c.teams[t].name; state.lg.teams[i].color = c.teams[t].color; });
+    }
+    if (!isObj(c.equipes)) c.equipes = cleanEquipes();
+    c.equipes.n = n;
+    lgEnsure(); save(); buildTeams(); renderSettings();
+  }
+  function lgSetMode(m) {
+    var c = cfg();
+    if (MODES.indexOf(m) < 0) return;
+    if (!isObj(c.equipes)) c.equipes = cleanEquipes();
+    c.equipes.mode = m;
+    lgEnsure(); save(); render(); renderSettings();
+  }
+  function lgSetPair(a, b) {
+    var lg = state.lg, n = lgN(cfg());
+    if (a === b || a < 0 || b < 0 || a >= n || b >= n) { render(); return; }
+    snap();
+    lg.pair = [a, b]; lgEnsure(); save(); render(); buzz();
+  }
+  function lgInitUi() {
+    var h = "", k;
+    for (k = 2; k <= MAXT; k++) h += '<option value="' + k + '">' + k + ' équipes</option>';
+    $("eqN").innerHTML = h; $("lgN").innerHTML = h;
+    h = MODES.map(function (m) { return '<option value="' + m + '">' + MODEL[m] + '</option>'; }).join("");
+    $("eqMode").innerHTML = h; $("lgMode").innerHTML = h;
+  }
+  $("lgEdit").addEventListener("click", function () { lgPanelOpen = !lgPanelOpen; renderLg(); });
+  $("lgClose").addEventListener("click", function () { lgPanelOpen = false; renderLg(); });
+  $("lgA").addEventListener("change", function (e) { lgSetPair(toInt(e.target.value, 0), state.lg.pair[1]); });
+  $("lgB").addEventListener("change", function (e) { lgSetPair(state.lg.pair[0], toInt(e.target.value, 1)); });
+  $("lgN").addEventListener("change", function (e) { lgSetN(toInt(e.target.value, 2)); });
+  $("lgMode").addEventListener("change", function (e) { lgSetMode(e.target.value); });
+  $("eqN").addEventListener("change", function (e) { lgSetN(toInt(e.target.value, 2)); });
+  $("eqMode").addEventListener("change", function (e) { lgSetMode(e.target.value); });
+  $("tmMore").addEventListener("input", function (e) {
+    var el = e.target, k = toInt(el.getAttribute("data-ti"), -1);
+    if (k < 2 || k >= MAXT || el.tagName !== "INPUT") return;
+    tmSet(k, "name", el.value.slice(0, 20)); save();
+  });
+  $("tmMore").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    var k = toInt(b.getAttribute("data-ti"), -1);
+    if (k < 2 || k >= MAXT) return;
+    tmSet(k, "color", clamp(toInt(b.getAttribute("data-col"), 0), 0, NCOL - 1)); save(); renderTeamsUi();
+  });
+
+  /* ---------- Bloc 7 bis : démarrage unique, mise en place, enchaînement ---------- */
+  function minTxt(sec) {
+    var s = Math.round(sec), m = Math.floor(s / 60), r = s % 60;
+    return r ? m + ":" + (r < 10 ? "0" : "") + r : String(m);
+  }
+  function parseMin(v) {
+    v = String(v === undefined || v === null ? "" : v).trim().replace(",", ".");
+    if (!v) return null;
+    var m = v.match(/^(\d+):(\d{1,2})$/);
+    if (m) return toInt(m[1], 0) + Math.min(59, toInt(m[2], 0)) / 60;
+    var f = parseFloat(v);
+    return isFinite(f) && f >= 0 ? f : NaN;
+  }
+  function chainOn() {
+    var c = cfg();
+    return !!(c.enchainement && c.enchainement.actif && c.timer.mode === "timer" && c.exo.duration > 0 && !c.noscore);
+  }
+  function pzMs() { var p = state.time.pz; return p ? p.el + (p.t0 ? Math.max(0, Date.now() - p.t0) : 0) : 0; }
+  function startPause() {
+    state.time.pz = { dur: cfg().enchainement.pause, el: 0, t0: Date.now() };
+    save();
+  }
+  function pausePz() { var p = state.time.pz; if (!p || !p.t0) return; p.el = pzMs(); p.t0 = null; save(); }
+  function resumePz() { var p = state.time.pz; if (!p || p.t0) return; p.t0 = Date.now(); save(); }
+  function chainNext() {
+    var g = state.game, t = state.time;
+    if (!t.pz) return;
+    t.pz = null;
+    if (!g.over) { save(); render(); return; }
+    var fin = g.over.final;
+    nextRound();
+    if (!fin && !state.game.over && state.exo.startedAt && !state.exo.done && cfg().timer.mode === "timer") { startTime(); softAlert(); }
+    render();
+  }
+  function startAll() {
+    var c = cfg();
+    ensureAudio();
+    startExo();
+    if (c.timer.mode !== "none" && !state.game.over && !state.time.done) startTime();
+    resumePz();
+    renderTime(); renderExo();
+  }
+  function pauseAll() { pauseExo(); pauseTime(); pausePz(); renderTime(); renderExo(); }
+  function renderChainHint() {
+    if (state.time.pz && state.game.over) {
+      $("oNext").textContent = "Lancer la manche maintenant";
+      $("ohint").textContent = "Mise en place en cours : la manche suivante démarre toute seule.";
+    }
+  }
+  $("eGo").addEventListener("click", function () { if (state.exo.startedAt) pauseAll(); else startAll(); });
+  $("tGo").addEventListener("click", function () {
+    if (state.time.pz) { chainNext(); return; }
+    if (state.time.startedAt) pauseTime();
+    else { startTime(); if (cfg().exo.duration > 0 && !state.exo.startedAt && !state.exo.done) startExo(); }
+  });
+  $("tNom").addEventListener("input", function (e) { cfg().timer.nom = e.target.value.slice(0, 24); save(); renderTime(); });
+  $("chChk").addEventListener("change", function (e) { cfg().enchainement.actif = e.target.checked; save(); renderSettings(); });
+  $("chPause").addEventListener("input", function (e) { var n = parseInt(e.target.value, 10); if (!isNaN(n)) { cfg().enchainement.pause = clamp(n, 5, 300); save(); } });
+  $("chPause").addEventListener("change", function (e) { var n = clamp(toInt(e.target.value, 30), 5, 300); e.target.value = n; cfg().enchainement.pause = n; save(); });
+
+
+  /* ---------- Bloc 7 ter : bandeau « règle de l'exercice » ---------- */
+  function regleLines(c) {
+    var L = [], fin = [], bt, p, tOn = c.timer.mode === "timer" && !(state.guided && state.time.off);
+    if (!c.noscore) {
+      if (c.solo) L.push("Manche : " + (c.goals.score > 0 ? c.goals.score + " paniers à marquer" : "à la main (bouton Terminer la manche)") + (tOn ? " en " + minTxt(c.timer.duration) + " min, sinon la manche est perdue" : ""));
+      else {
+      if (c.goals.score > 0) fin.push("premier à " + c.goals.score + " points");
+      if (c.goals.counter > 0) fin.push(c.counter.name + " : " + c.goals.counter);
+      if (tOn) fin.push("au bout de " + minTxt(c.timer.duration) + " min" + (c.timer.end === "score" ? ", le plus haut score gagne" : ", pas de gagnant"));
+      if (fin.length) L.push("Manche : " + fin.join(" ou "));
+      else if (c.exo.duration > 0) L.push("Un seul match : score final affiché à la fin de l\x27exercice (" + minTxt(c.exo.duration) + " min)");
+      else L.push("Manche : à la main (bouton Terminer la manche)");
+      }
+      bt = c.buttons.filter(function (b) { return !b.gap && !b.reset; }).map(function (b) { return (b.label || "Point") + " " + (b.value > 0 ? "+" : "") + b.value; });
+      if (bt.length) L.push("Points : " + bt.join(" · "));
+      if (c.counter.enabled) L.push("Compteur 2 : " + c.counter.name);
+      if (c.palier && c.palier.every > 0) L.push("Seuil : tous les " + c.palier.every + " (" + c.counter.name + ")" + (c.palier.gains && c.palier.gains.length ? " = " + (c.palier.gains.length > 1 ? "une récompense au choix" : c.palier.gains[0]) : ""));
+      if (c.equipes && c.equipes.n > 2) L.push(c.equipes.n + " équipes · rotation : " + MODEL[c.equipes.mode]);
+      if (c.enchainement && c.enchainement.actif && tOn) L.push("Manches enchaînées (mise en place " + c.enchainement.pause + " s)");
+    }
+    if (c.signal && c.signal.at && c.signal.at.length) {
+      var dur0 = state.exo.duration > 0 ? state.exo.duration : c.exo.duration;
+      c.signal.at.forEach(function (a) { if (!(dur0 > 0) || a.t * 60 < dur0) L.push("Signal à " + minTxt(a.t * 60) + " min : " + (a.label || "changement")); });
+    }
+    if (c.signal && (c.signal.every > 0 || c.signal.half)) {
+      var dur = state.exo.duration > 0 ? state.exo.duration : c.exo.duration, ts = sigTimes(c, dur).map(function (s) { return minTxt(s); });
+      if (ts.length) L.push((c.signal.half ? "Signal à la moitié, " : "Signal à ") + (ts.length > 1 ? ts.slice(0, -1).join(", ") + " et " + ts[ts.length - 1] : ts[0]) + " min : " + (c.signal.label || "changement"));
+      else if (c.exo.duration <= 0 && c.signal.every > 0) L.push("Signal toutes les " + c.signal.every + " min : " + (c.signal.label || "changement"));
+    }
+    return L;
+  }
+  var regleKey = "", regleClosed = false;
+  function renderRegle() {
+    var box = $("regle"), gd = state.guided;
+    if (!gd || gd.finished) { box.hidden = true; return; }
+    var L = regleLines(cfg()), key = L.join("|");
+    box.hidden = !L.length;
+    box.classList.toggle("closed", regleClosed);
+    if (key === regleKey) return;
+    regleKey = key;
+    box.innerHTML = '<p class="rt">Règle de l\'exercice</p>' + L.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join("");
+  }
+  $("regle").addEventListener("click", function (e) { if (e.target.closest && e.target.closest(".rt")) { regleClosed = !regleClosed; $("regle").classList.toggle("closed", regleClosed); } });
+  /* ---------- Réglage en direct : objectif, temps de manche, seuil ---------- */
+  var ctlOpen = false;
+  var GOALS = [8, 10, 12, 15, 20], TIMES = [90, 120, 150, 180, 240], SEUILS = [1, 2, 3, 4, 5];
+  function setGoal(v) {
+    var c = cfg(), g = state.game;
+    v = clamp(v, 1, 99); c.goals.score = v; remember("score", v);
+    if (!g.over && (g.a.score >= v || (!c.solo && g.b.score >= v))) snap();
+    checkEnd("a"); if (!c.solo) checkEnd("b");
+    save(); render();
+  }
+  function setSeuil(v) {
+    var c = cfg(); v = clamp(v, 1, 99); c.palier.every = v; remember("seuil", v); save(); render();
+  }
+  function renderCtl() {
+    var gd = state.guided, c = cfg();
+    var okG = !!gd && !gd.finished && !c.noscore;
+    var hasG = okG && (c.goals.score > 0 || c.solo), hasT = okG && c.timer.mode === "timer" && !state.time.off, hasS = okG && c.counter.enabled && c.palier.every > 0;
+    $("ctl").hidden = !(hasG || hasT || hasS);
+    $("ctlObj").hidden = !hasG; $("ctlTime").hidden = !hasT; $("ctlSeuil").hidden = !hasS;
+    if (hasG) $("ctlObj").textContent = "Objectif : " + c.goals.score + (c.solo ? " paniers" : " pts");
+    if (hasT) $("ctlTime").textContent = "Temps : " + minTxt(c.timer.duration);
+    if (hasS) $("ctlSeuil").textContent = "Seuil : " + c.palier.every;
+    var open = ctlOpen && !$("ctl").hidden;
+    $("ctlPanel").hidden = !open;
+    if (!open) return;
+    var h = "";
+    function presets(list, cur, act, fmtv) { return '<div class="cbt">' + list.map(function (n) { return '<button type="button" data-ctl="' + act + '=' + n + '"' + (n === cur ? ' class="on"' : '') + '>' + fmtv(n) + '</button>'; }).join("") + '</div>'; }
+    if (hasG) h += '<div class="crow2"><div class="cval">Objectif : ' + c.goals.score + (c.solo ? " paniers" : " points") + '</div>' + presets(GOALS, c.goals.score, "goal", String) +
+      '<div class="cbt four"><button type="button" data-ctl="goal-5">−5</button><button type="button" data-ctl="goal-1">−1</button><button type="button" data-ctl="goal+1">+1</button><button type="button" data-ctl="goal+5">+5</button></div></div>';
+    if (hasT) h += '<div class="crow2"><div class="cval">Temps de manche : ' + minTxt(c.timer.duration) + '</div>' + presets(TIMES, c.timer.duration, "time", minTxt) +
+      '<div class="cbt four"><button type="button" data-ctl="time-60">− 1 min</button><button type="button" data-ctl="time-10">− 10 s</button><button type="button" data-ctl="time+10">+ 10 s</button><button type="button" data-ctl="time+60">+ 1 min</button></div></div>';
+    if (hasS) h += '<div class="crow2"><div class="cval">Seuil de ' + esc(c.counter.name) + ' : ' + c.palier.every + '</div>' + presets(SEUILS, c.palier.every, "seuil", String) +
+      '<div class="cbt four"><button type="button" data-ctl="seuil-1">−1</button><button type="button" data-ctl="seuil+1">+1</button><button type="button" data-ctl="seuil+3">+3</button><button type="button" data-ctl="seuil-3">−3</button></div></div>';
+    $("ctlBody").innerHTML = h + '<p class="note">Le changement vaut pour la manche en cours et les suivantes.</p>';
+  }
+  $("ctlObj").addEventListener("click", function () { ctlOpen = !ctlOpen; renderCtl(); });
+  $("ctlTime").addEventListener("click", function () { ctlOpen = !ctlOpen; renderCtl(); });
+  $("ctlSeuil").addEventListener("click", function () { ctlOpen = !ctlOpen; renderCtl(); });
+  $("ctlClose").addEventListener("click", function () { ctlOpen = false; renderCtl(); });
+  $("ctlPanel").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-ctl]"); if (!b) return;
+    var m = /^(goal|time|seuil)([=+-])(\d+)$/.exec(b.getAttribute("data-ctl")); if (!m) return;
+    var n = parseInt(m[3], 10), c = cfg(), cur = m[1] === "goal" ? c.goals.score : (m[1] === "time" ? c.timer.duration : c.palier.every);
+    var v = m[2] === "=" ? n : (m[2] === "+" ? cur + n : cur - n);
+    if (m[1] === "goal") setGoal(v); else if (m[1] === "time") { setTimerDur(v); render(); } else setSeuil(v);
+    buzz();
+  });
+
+  lgInitUi();
+  lgEnsure();
+  buildTeams();
+  renderJournal();
+  wlRequest();
 })();
 </script>
 
