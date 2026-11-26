@@ -1201,9 +1201,10 @@ body.gmode .clubbar{display:none}
   </section>
 
   <section class="card">
-    <h2>Charte du club (fichier)</h2>
-    <p class="note">Le fichier contient l'identité, les infos et les liens (pas les joueurs). Envoie-le par WhatsApp : l'autre coach l'importe et retrouve le club.</p>
-    <div class="jbtns"><button id="cbExp" type="button">Exporter la charte</button><label class="filebtn" for="cbImp">Importer une charte<input id="cbImp" class="sr" type="file" accept=".json,.txt,application/json,text/plain"></label></div>
+    <h2>Fichier du club</h2>
+    <p class="note">« Tout le club » met dans un seul fichier l'identité, les liens, les salles, les créneaux et tous les joueurs. Envoie-le aux coachs du club par WhatsApp : ils touchent « Importer un fichier du club » et retrouvent tout. Chaque coach choisit ensuite ses équipes dans l'écran Équipe.</p>
+    <div class="jbtns"><button id="cbAllExp" class="prim" type="button">Exporter tout le club</button><label class="filebtn" for="cbImp">Importer un fichier du club<input id="cbImp" class="sr" type="file" accept=".json,.txt,application/json,text/plain"></label></div>
+    <div class="jbtns"><button id="cbExp" type="button">Exporter la charte seule (sans joueurs)</button></div>
     <div id="cbImpBox" hidden>
       <p class="note" id="cbImpTxt"></p>
       <div class="jbtns"><button id="cbImpRep" type="button">Remplacer le club actif</button><button id="cbImpNew" type="button">Ajouter comme nouveau club</button><button id="cbImpNo" type="button">Annuler</button></div>
@@ -1216,7 +1217,7 @@ body.gmode .clubbar{display:none}
 
 <script>
 (function () {
-  var VERSION = "v8.7d · 25/11/2026";
+  var VERSION = "v8.8a · 26/11/2026";
   /* ---------- v7.8 : clubs (registre global + données par club) ---------- */
   var CLUBS_KEY = "compteur-clubs-v1", CLUB_DEF = "mon-club";
   var CLUB_BASES = ["compteur-match-v2", "compteur-match-journal-v1", "compteur-match-cycles-v1", "compteur-match-equipe-v1", "compteur-choix-seances-v1", "compteur-habitues-v1", "compteur-seances-faites-v1", "compteur-histo-joueurs-v1", "joueurs-v2", "compteur-match-presents-v1", "compteur-eqjour-v1"];
@@ -7267,6 +7268,7 @@ body.gmode .clubbar{display:none}
     if (a < 0 || z <= a) throw new Error("Aucune liste trouvée dans ce texte.");
     var raw; try { raw = JSON.parse(txt.slice(a, z + 1)); } catch (e) { throw new Error("Le texte n'est pas une liste lisible."); }
     if (!isObj(raw)) throw new Error("Ce texte n'est pas une liste de joueurs de l'appli.");
+    if (raw.format === "club-complet-1") throw new Error("Ce fichier contient tout le club : importe-le dans « Mon club », cadre « Fichier du club ».");
     var fd = typeof raw.date === "string" ? cut(raw.date, 30) : "";
     if (raw.format === "compteur-joueurs-1" && Array.isArray(raw.joueurs)) {
       var out = []; raw.joueurs.slice(0, 400).forEach(function (x) { var p = cleanPlayer(x, true); if (p) out.push(p); });
@@ -7528,7 +7530,7 @@ body.gmode .clubbar{display:none}
   $("plRestore").addEventListener("click", function () { plDoRestore($("plImp").value); });
   $("plFile").addEventListener("change", function (e) {
     var inp = e.target, f = inp.files && inp.files[0]; if (!f) return;
-    if (f.size > 3000000) { plSay("plMsg2", "Ce fichier est trop gros pour être une liste de joueurs."); return; }
+    if (f.size > 6000000) { plSay("plMsg2", "Ce fichier est trop gros pour être une liste de joueurs."); return; }
     var rd = new FileReader();
     rd.onload = function () { plDoRestore(String(rd.result || "")); inp.value = ""; };
     rd.onerror = function () { plSay("plMsg2", "Lecture du fichier impossible."); };
@@ -7771,7 +7773,7 @@ body.gmode .clubbar{display:none}
   function salFileIn(inp, fn) {
     var f = inp.files && inp.files[0]; if (!f) return;
     var fr = new FileReader();
-    fr.onload = function () { try { $("salMsg").textContent = fn(String(fr.result || "")); } catch (e) { $("salMsg").textContent = e.message; } inp.value = ""; renderSalClub(); };
+    fr.onload = function () { var t = String(fr.result || ""); try { if (/"format"\s*:\s*"club-complet-1"/.test(t.slice(0, 400))) throw new Error("Ce fichier contient tout le club : importe-le avec « Importer un fichier du club », plus bas."); $("salMsg").textContent = fn(t); } catch (e) { $("salMsg").textContent = e.message; } inp.value = ""; renderSalClub(); };
     fr.onerror = function () { $("salMsg").textContent = "Lecture impossible."; inp.value = ""; };
     fr.readAsText(f);
   }
@@ -7923,33 +7925,70 @@ body.gmode .clubbar{display:none}
     var c = clubCur(), docs = (c.docs || []).slice(); docs.splice(parseInt(b.getAttribute("data-cbdel"), 10), 1);
     clubSetCur({ docs: docs }); renderClubDocs(); cbSay("cbDMsg", "Document retiré.");
   });
-  $("cbExp").addEventListener("click", function () {
+  function charteObj() {
     var c = clubCur(), o = { format: "compteur-club-1", xid: ensureXid(c) }, k;
     for (k in CLUB_FIELDS) if (CLUB_FIELDS.hasOwnProperty(k)) o[k] = c[k] || "";
     o.c1 = c.c1 || ""; o.c2 = c.c2 || ""; o.logo = c.logo || ""; o.docs = c.docs || [];
-    var txt = JSON.stringify(o, null, 1), nm = "charte-" + (clubName(c) || "club").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") + ".json";
+    return o;
+  }
+  function clubSlug() { return (clubName(clubCur()) || "club").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "club"; }
+  function cbSendFile(txt, nm, what) {
     try {
       if (navigator.canShare && window.File) {
         var ff = new File([txt], nm, { type: "application/json" });
-        if (navigator.canShare({ files: [ff] })) { navigator.share({ files: [ff] }).catch(function () {}); cbSay("cbImpMsg", "Charte prête à partager."); return; }
+        if (navigator.canShare({ files: [ff] })) { navigator.share({ files: [ff] }).catch(function () {}); cbSay("cbImpMsg", what + " prêt à partager."); return; }
       }
     } catch (er) {}
     try {
       var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([txt], { type: "application/json" })); a.download = nm;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a); cbSay("cbImpMsg", "Charte téléchargée : " + nm);
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); cbSay("cbImpMsg", what + " téléchargé : " + nm);
     } catch (er2) { cbSay("cbImpMsg", "Export impossible sur ce navigateur."); }
+  }
+  $("cbExp").addEventListener("click", function () { cbSendFile(JSON.stringify(charteObj(), null, 1), "charte-" + clubSlug() + ".json", "Fichier de charte"); });
+  function salAllObj() {
+    return { format: "salles-club-1", version: 1, date: todayIso(), source: "appli-entrainement", salles: salles.map(function (x) { return { id: x.id, nom: x.nom, nom_complet: x.nc || "", ville: x.ville, modifie_le: x.modifie, terrains: { paniers_max_technique: x.pmax, grands_terrains_largeur: x.gl || 0, paniers_reglables_hauteur: { niveau: x.reg } }, configurations: x.cfg.map(function (c) { return { id: c.id, nom: c.nom, grands_terrains: c.gt, grand_divisible_en_demis: c.div, demi_terrains_en_plus: c.dp, paniers_utilises: c.pu, demi_terrains_max: cfgDm(c), paniers_max: cfgPm(c), note: c.note }; }), materiel: x.mat.map(function (m) { return { article: m.a, libelle: m.l, niveau: m.n }; }) }; }) };
+  }
+  function crAllObj() {
+    return { format: "creneaux-club-1", version: 1, date: todayIso(), source: "appli-entrainement", creneaux: creneaux.map(function (c) { return { id: c.id, salle_id: c.sid, jour: c.jour, debut: c.debut, fin: c.fin, equipes: c.eq, statut: c.st, type: c.typ, recurrence: c.rec, date: c.date, modifie_le: c.modifie }; }) };
+  }
+  $("cbAllExp").addEventListener("click", function () {
+    var c = clubCur();
+    if (!clubName(c)) { cbSay("cbImpMsg", "Donne d'abord un nom au club (en haut de cet écran)."); return; }
+    var o = { format: "club-complet-1", version: 1, date: new Date().toISOString(), source: "appli-entrainement", club: charteObj(), salles: salAllObj(), creneaux: crAllObj(), joueurs: JSON.parse(exportPlayers()) };
+    cbSendFile(JSON.stringify(o), "club-complet_" + clubSlug() + "_" + todayIso() + ".json", "Fichier du club (" + salles.length + " salle(s), " + creneaux.length + " créneau(x), " + players.length + " joueur(s))");
   });
+  /* import de « tout le club » : salles, créneaux et joueurs vont dans le club choisi */
+  var CB_RESTE = "compteur-club-reste-v1";
+  function cbRest(o) {
+    var out = [];
+    function one(part, fn, lab) { if (!isObj(part)) return; try { out.push(fn(JSON.stringify(part))); } catch (e) { out.push(lab + " : " + e.message); } }
+    one(o.salles, importSalles, "Salles"); one(o.creneaux, importCreneaux, "Créneaux"); one(o.joueurs, importText, "Joueurs");
+    try { renderSalClub(); } catch (e) {}
+    return out.join(" ");
+  }
+  function cbRestLater(o) { try { sessionStorage.setItem(CB_RESTE, JSON.stringify({ salles: o.salles, creneaux: o.creneaux, joueurs: o.joueurs })); return true; } catch (e) { return false; } }
+  var cbPendAll = null;
   $("cbImp").addEventListener("change", function () {
     var inp = $("cbImp"), f = inp.files && inp.files[0]; if (!f) return;
-    if (f.size > 400000) { cbSay("cbImpMsg", "Fichier trop gros pour une charte."); inp.value = ""; return; }
+    if (f.size > 6000000) { cbSay("cbImpMsg", "Fichier trop gros pour un fichier du club."); inp.value = ""; return; }
     var fr = new FileReader();
     fr.onload = function () {
       var o = null; try { o = JSON.parse(String(fr.result || "")); } catch (e) { o = null; }
       inp.value = "";
-      if (!o || o.format !== "compteur-club-1") { cbSay("cbImpMsg", "Ce fichier n'est pas une charte de club."); return; }
+      cbPendAll = null;
+      if (o && o.format === "club-complet-1" && isObj(o.club)) { cbPendAll = o; o = o.club; }
+      else if (o && (o.format === "salles-club-1" || o.format === "creneaux-club-1")) { cbSay("cbImpMsg", "C'est un fichier de salles ou de créneaux : utilise le cadre « Salles et créneaux », plus haut."); return; }
+      else if (o && /^compteur-joueurs/.test(o.format || "")) { cbSay("cbImpMsg", "C'est une liste de joueurs : importe-la dans l'écran Équipe."); return; }
+      if (!o || o.format !== "compteur-club-1") { cbSay("cbImpMsg", "Ce fichier n'est pas un fichier du club."); return; }
       var n = cleanClub(o);
-      if (!clubName(n)) { cbSay("cbImpMsg", "Charte sans nom de club : import annulé."); return; }
+      if (!clubName(n)) { cbSay("cbImpMsg", "Fichier sans nom de club : import annulé."); cbPendAll = null; return; }
       var same = n.xid ? clubReg.clubs.filter(function (x) { return x.xid === n.xid; })[0] : null;
+      if (same && cbPendAll) {
+        n.id = same.id; for (var j = 0; j < clubReg.clubs.length; j++) if (clubReg.clubs[j].id === same.id) clubReg.clubs[j] = n;
+        if (same.id === clubReg.actif) { clubsSave(); applyClubTheme(); renderClub(); var mm = cbRest(cbPendAll); cbPendAll = null; cbSay("cbImpMsg", "Club mis à jour : " + clubName(n) + ". " + mm); return; }
+        if (guidedBusy() && !confirm("Une séance est en cours. Passer au club « " + clubName(n) + " » ? Elle reste enregistrée dans le club actuel.")) { clubsSave(); cbPendAll = null; cbSay("cbImpMsg", "Import arrêté : la séance continue."); return; }
+        cbRestLater(cbPendAll); cbPendAll = null; clubReg.actif = same.id; clubsSave(); clubReload(); return;
+      }
       if (same) {
         n.id = same.id; for (var i = 0; i < clubReg.clubs.length; i++) if (clubReg.clubs[i].id === same.id) clubReg.clubs[i] = n;
         clubsSave(); if (same.id === clubReg.actif) { applyClubTheme(); renderClub(); }
@@ -7957,22 +7996,25 @@ body.gmode .clubbar{display:none}
         if (same.id !== clubReg.actif) renderClub();
         return;
       }
-      cbPend = n; $("cbImpTxt").textContent = "Charte « " + clubName(n) + " » prête. Que faire ?"; $("cbImpBox").hidden = false; cbSay("cbImpMsg", "");
+      cbPend = n; $("cbImpTxt").textContent = (cbPendAll ? "Club « " + clubName(n) + " » prêt (salles, créneaux et joueurs compris). Que faire ?" : "Charte « " + clubName(n) + " » prête. Que faire ?"); $("cbImpBox").hidden = false; cbSay("cbImpMsg", "");
     };
     fr.onerror = function () { cbSay("cbImpMsg", "Lecture impossible."); };
     fr.readAsText(f);
   });
-  $("cbImpNo").addEventListener("click", function () { cbPend = null; $("cbImpBox").hidden = true; });
+  $("cbImpNo").addEventListener("click", function () { cbPend = null; cbPendAll = null; $("cbImpBox").hidden = true; });
   $("cbImpRep").addEventListener("click", function () {
     if (!cbPend) return;
     var c = clubCur(); cbPend.id = c.id; if (!cbPend.xid) cbPend.xid = c.xid || "";
     for (var i = 0; i < clubReg.clubs.length; i++) if (clubReg.clubs[i].id === c.id) clubReg.clubs[i] = cbPend;
-    clubsSave(); cbPend = null; $("cbImpBox").hidden = true; applyClubTheme(); renderClub(); cbSay("cbImpMsg", "Identité du club actif remplacée.");
+    clubsSave(); cbPend = null; $("cbImpBox").hidden = true; applyClubTheme(); renderClub();
+    if (cbPendAll) { var mm = cbRest(cbPendAll); cbPendAll = null; cbSay("cbImpMsg", "Club actif remplacé. " + mm); }
+    else cbSay("cbImpMsg", "Identité du club actif remplacée.");
   });
   $("cbImpNew").addEventListener("click", function () {
     if (!cbPend) return;
     if (guidedBusy() && !confirm("Une séance est en cours. Changer de club ? Elle reste enregistrée dans le club actuel.")) return;
     cbPend.id = "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+    if (cbPendAll) { cbRestLater(cbPendAll); cbPendAll = null; }
     clubReg.clubs.push(cbPend); clubReg.actif = cbPend.id; cbPend = null; clubsSave(); clubReload();
   });
 
@@ -7987,6 +8029,7 @@ body.gmode .clubbar{display:none}
   wlRequest();
   applyClubTheme();
   try { if (sessionStorage.getItem("compteur-open-club") === "1") { sessionStorage.removeItem("compteur-open-club"); showClub(); } } catch (e) {}
+  try { var cbR = sessionStorage.getItem(CB_RESTE); if (cbR) { sessionStorage.removeItem(CB_RESTE); var cbM = cbRest(JSON.parse(cbR)); showClub(); cbSay("cbImpMsg", "Club « " + clubName(clubCur()) + " » activé. " + cbM); } } catch (e) {}
   try { mpBoot(); } catch (e) {}
   setTimeout(function () { try { mpCleanRun(); } catch (e) {} }, 4000);
   window.addEventListener("hashchange", function () { try { if (mpJoinInfo()) mpBoot(); } catch (e) {} });
